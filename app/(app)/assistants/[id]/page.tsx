@@ -16,6 +16,9 @@ import {
   Upload,
   BarChart3,
   Loader2,
+  Pencil,
+  Save,
+  X,
 } from 'lucide-react'
 
 import {
@@ -26,13 +29,14 @@ import {
   useChatbotEmbedCode,
   useActivateChatbot,
   usePauseChatbot,
-  useArchiveChatbot,
+  useUpdateChatbot,
 } from '@/features/assistants/hooks/useAssistants'
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { AdminOnly } from '@/components/guards/AdminOnly'
 import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { cn } from '@/lib/utils'
+import type { UpdateChatbotBody } from '@/services/chatbots.service'
 
 const TABS = ['Overview', 'Documents', 'Settings', 'Analytics'] as const
 
@@ -41,6 +45,8 @@ export default function AssistantDetailPage() {
   const id = params.id as string
   const [tab, setTab] = useState<(typeof TABS)[number]>('Overview')
   const [copied, setCopied] = useState<'script' | 'iframe' | 'url' | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editValues, setEditValues] = useState<UpdateChatbotBody>({})
 
   const { data: assistant, isLoading } = useChatbot(id)
   const { data: docsData } = useChatbotDocuments(id)
@@ -49,7 +55,7 @@ export default function AssistantDetailPage() {
   const { mutate: deleteDoc } = useDeleteChatbotDocument(id)
   const { mutate: activate } = useActivateChatbot()
   const { mutate: pause } = usePauseChatbot()
-  const { mutate: archive } = useArchiveChatbot()
+  const { mutate: update, isPending: isSaving } = useUpdateChatbot(id)
 
   const handleCopy = (text: string, key: 'script' | 'iframe' | 'url') => {
     navigator.clipboard.writeText(text)
@@ -64,6 +70,30 @@ export default function AssistantDetailPage() {
     formData.append('file', file)
     uploadDoc(formData)
   }
+
+  const startEdit = () => {
+    if (!assistant) return
+    setEditValues({
+      name: assistant.name,
+      system_prompt: assistant.system_prompt ?? '',
+      welcome_message: assistant.welcome_message,
+      fallback_message: assistant.fallback_message ?? '',
+      brand_color: assistant.brand_color,
+      temperature: assistant.temperature,
+      top_k: assistant.top_k,
+      min_confidence: assistant.min_confidence,
+      enable_citations: assistant.enable_citations,
+      enable_grounding: assistant.enable_grounding,
+      strict_domain: assistant.strict_domain,
+    })
+    setEditing(true)
+  }
+
+  const saveEdit = () => {
+    update(editValues, { onSuccess: () => setEditing(false) })
+  }
+
+  const docs = Array.isArray(docsData) ? docsData : (docsData?.data ?? [])
 
   if (isLoading) {
     return (
@@ -118,11 +148,6 @@ export default function AssistantDetailPage() {
                 Pause
               </button>
             )}
-            {assistant.status !== 'archived' && (
-              <button onClick={() => archive(id)} className="btn btn-ghost btn-sm">
-                Archive
-              </button>
-            )}
           </div>
         </AdminOnly>
       </div>
@@ -148,7 +173,6 @@ export default function AssistantDetailPage() {
       {/* ─── Overview ─── */}
       {tab === 'Overview' && (
         <div className="space-y-6 entrance">
-          {/* Channels */}
           <div className="surface p-5">
             <h3 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-4">
               Channels
@@ -171,7 +195,6 @@ export default function AssistantDetailPage() {
             </div>
           </div>
 
-          {/* Embed Code */}
           {embedCode && (
             <div className="surface p-5">
               <h3 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-4">
@@ -200,11 +223,10 @@ export default function AssistantDetailPage() {
             </div>
           )}
 
-          {/* Quick stats */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <StatBox label="Documents" value={String(assistant.document_count)} />
-            <StatBox label="Primary Lang" value={assistant.primary_language.toUpperCase()} />
             <StatBox label="Temperature" value={String(assistant.temperature)} />
+            <StatBox label="Top K" value={String(assistant.top_k)} />
             <StatBox label="Created" value={format(new Date(assistant.created_at), 'd MMM')} />
           </div>
         </div>
@@ -233,7 +255,7 @@ export default function AssistantDetailPage() {
           </div>
 
           <div className="surface overflow-hidden">
-            {!docsData || docsData.data.length === 0 ? (
+            {docs.length === 0 ? (
               <EmptyState
                 icon={<FileText className="h-6 w-6 text-[var(--text-faint)]" />}
                 title="No documents yet"
@@ -241,7 +263,7 @@ export default function AssistantDetailPage() {
               />
             ) : (
               <div className="divide-y divide-[var(--border-subtle)]">
-                {docsData.data.map((doc) => (
+                {docs.map((doc) => (
                   <div
                     key={doc.id}
                     className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--bg-secondary)]"
@@ -261,12 +283,9 @@ export default function AssistantDetailPage() {
                       <span
                         className={cn(
                           'badge text-[10px]',
-                          doc.status === 'ready'
-                            ? 'badge-success'
-                            : doc.status === 'processing'
-                            ? 'badge-warning'
-                            : doc.status === 'error'
-                            ? 'badge-error'
+                          doc.status === 'ready' ? 'badge-success'
+                            : doc.status === 'processing' ? 'badge-warning'
+                            : doc.status === 'error' ? 'badge-error'
                             : 'badge-ghost'
                         )}
                       >
@@ -293,21 +312,155 @@ export default function AssistantDetailPage() {
       {tab === 'Settings' && (
         <div className="space-y-6 entrance">
           <div className="surface p-5">
-            <h3 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-4">
-              Configuration
-            </h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <SettingRow label="System Prompt" value={assistant.system_prompt || '—'} />
-              <SettingRow label="Welcome Message" value={assistant.welcome_message} />
-              <SettingRow label="Fallback Message" value={assistant.fallback_message || '—'} />
-              <SettingRow label="Agent Mode" value={assistant.agent_mode} />
-              <SettingRow label="Temperature" value={String(assistant.temperature)} />
-              <SettingRow label="Top K" value={String(assistant.top_k)} />
-              <SettingRow label="Min Confidence" value={String(assistant.min_confidence)} />
-              <SettingRow label="Citations" value={assistant.enable_citations ? 'Enabled' : 'Disabled'} />
-              <SettingRow label="Grounding" value={assistant.enable_grounding ? 'Enabled' : 'Disabled'} />
-              <SettingRow label="Strict Domain" value={assistant.strict_domain ? 'Enabled' : 'Disabled'} />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-semibold text-[var(--text-primary)]">
+                Configuration
+              </h3>
+              <AdminOnly>
+                {editing ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditing(false)}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveEdit}
+                      disabled={isSaving}
+                      className="btn btn-primary btn-sm"
+                    >
+                      {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={startEdit} className="btn btn-secondary btn-sm">
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+                )}
+              </AdminOnly>
             </div>
+
+            {editing ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label mb-1 block">Name</label>
+                    <input
+                      value={editValues.name ?? ''}
+                      onChange={(e) => setEditValues((v) => ({ ...v, name: e.target.value }))}
+                      className="input w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="label mb-1 block">Brand Color</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={editValues.brand_color ?? '#000000'}
+                        onChange={(e) => setEditValues((v) => ({ ...v, brand_color: e.target.value }))}
+                        className="h-9 w-9 cursor-pointer rounded border border-[var(--border-default)]"
+                      />
+                      <input
+                        value={editValues.brand_color ?? ''}
+                        onChange={(e) => setEditValues((v) => ({ ...v, brand_color: e.target.value }))}
+                        className="input flex-1 font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="label mb-1 block">System Prompt</label>
+                  <textarea
+                    value={editValues.system_prompt ?? ''}
+                    onChange={(e) => setEditValues((v) => ({ ...v, system_prompt: e.target.value }))}
+                    className="input w-full min-h-[80px] resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label mb-1 block">Welcome Message</label>
+                    <input
+                      value={editValues.welcome_message ?? ''}
+                      onChange={(e) => setEditValues((v) => ({ ...v, welcome_message: e.target.value }))}
+                      className="input w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="label mb-1 block">Fallback Message</label>
+                    <input
+                      value={editValues.fallback_message ?? ''}
+                      onChange={(e) => setEditValues((v) => ({ ...v, fallback_message: e.target.value }))}
+                      className="input w-full"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="label mb-1 block">Temperature</label>
+                    <input
+                      type="number" step={0.1} min={0} max={1}
+                      value={editValues.temperature ?? 0}
+                      onChange={(e) => setEditValues((v) => ({ ...v, temperature: parseFloat(e.target.value) }))}
+                      className="input w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="label mb-1 block">Top K</label>
+                    <input
+                      type="number" min={1} max={100}
+                      value={editValues.top_k ?? 0}
+                      onChange={(e) => setEditValues((v) => ({ ...v, top_k: parseInt(e.target.value) }))}
+                      className="input w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="label mb-1 block">Min Confidence</label>
+                    <input
+                      type="number" step={0.05} min={0} max={1}
+                      value={editValues.min_confidence ?? 0}
+                      onChange={(e) => setEditValues((v) => ({ ...v, min_confidence: parseFloat(e.target.value) }))}
+                      className="input w-full"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {(
+                    [
+                      { key: 'enable_citations', label: 'Citations' },
+                      { key: 'enable_grounding', label: 'Grounding' },
+                      { key: 'strict_domain', label: 'Strict Domain' },
+                    ] as { key: keyof UpdateChatbotBody; label: string }[]
+                  ).map(({ key, label }) => (
+                    <label key={key} className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!(editValues[key])}
+                        onChange={(e) => setEditValues((v) => ({ ...v, [key]: e.target.checked }))}
+                        className="rounded border-[var(--border-default)]"
+                      />
+                      <span className="text-sm text-[var(--text-primary)]">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <SettingRow label="System Prompt" value={assistant.system_prompt || '—'} />
+                <SettingRow label="Welcome Message" value={assistant.welcome_message} />
+                <SettingRow label="Fallback Message" value={assistant.fallback_message || '—'} />
+                <SettingRow label="Brand Color" value={assistant.brand_color} />
+                <SettingRow label="Temperature" value={String(assistant.temperature)} />
+                <SettingRow label="Top K" value={String(assistant.top_k)} />
+                <SettingRow label="Min Confidence" value={String(assistant.min_confidence)} />
+                <SettingRow label="Citations" value={assistant.enable_citations ? 'Enabled' : 'Disabled'} />
+                <SettingRow label="Grounding" value={assistant.enable_grounding ? 'Enabled' : 'Disabled'} />
+                <SettingRow label="Strict Domain" value={assistant.strict_domain ? 'Enabled' : 'Disabled'} />
+              </div>
+            )}
           </div>
         </div>
       )}

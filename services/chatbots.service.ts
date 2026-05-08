@@ -34,7 +34,6 @@ export interface UpdateChatbotBody {
   enable_citations?: boolean
   enable_grounding?: boolean
   strict_domain?: boolean
-  agent_mode?: AgentMode
   domain_keywords?: string[]
 }
 
