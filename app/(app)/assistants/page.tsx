@@ -46,7 +46,7 @@ export default function AssistantsPage() {
   const { mutate: archive, isPending: isArchiving } = useArchiveChatbot()
   const { mutate: remove, isPending: isDeleting } = useDeleteChatbot()
 
-  const totalPages = data ? Math.ceil(data.meta.total / 20) : 1
+  const totalPages = data?.meta ? Math.ceil(data.meta.total / 20) : 1
 
   return (
     <div className="relative space-y-6">
@@ -56,7 +56,7 @@ export default function AssistantsPage() {
           <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
             Assistants
           </h1>
-          {data && (
+          {data?.meta && (
             <span className="badge badge-accent">{data.meta.total} assistants</span>
           )}
         </div>

@@ -63,7 +63,7 @@ export default function DocumentQueuePage() {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
-  const totalPages = data ? Math.ceil(data.meta.total / 20) : 1
+  const totalPages = data?.meta ? Math.ceil(data.meta.total / 20) : 1
 
   return (
     <div className="relative space-y-6">
@@ -72,7 +72,7 @@ export default function DocumentQueuePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Document Queue</h1>
-          {data && (
+          {data?.meta && (
             <span className="badge badge-accent">{data.meta.total} documents</span>
           )}
         </div>
