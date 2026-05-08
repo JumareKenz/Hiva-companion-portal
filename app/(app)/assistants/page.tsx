@@ -46,7 +46,10 @@ export default function AssistantsPage() {
   const { mutate: archive, isPending: isArchiving } = useArchiveChatbot()
   const { mutate: remove, isPending: isDeleting } = useDeleteChatbot()
 
-  const items = Array.isArray(data) ? data : (data?.data ?? [])
+  // Normalise — API may return array, { data:[...] }, or { chatbots:[...] }
+  const items = Array.isArray(data)
+    ? data
+    : (data?.data ?? (data as unknown as { chatbots?: unknown[] })?.chatbots ?? [])
   const totalPages = data?.meta ? Math.ceil(data.meta.total / 20) : 1
 
   return (

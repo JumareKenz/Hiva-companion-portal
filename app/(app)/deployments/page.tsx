@@ -107,7 +107,9 @@ export default function DeploymentsPage() {
   const { mutate: activate, isPending: isActivating } = useActivateChatbot()
   const { mutate: pause, isPending: isPausing } = usePauseChatbot()
 
-  const bots: AgencyChatbot[] = Array.isArray(botsData) ? botsData : (botsData?.data ?? [])
+  const bots: AgencyChatbot[] = Array.isArray(botsData)
+    ? botsData
+    : (botsData?.data ?? (botsData as unknown as { chatbots?: AgencyChatbot[] })?.chatbots ?? [])
   const activeBots = bots.filter((b) => b.status === 'active')
   const draftBots = bots.filter((b) => b.status === 'draft')
   const pausedBots = bots.filter((b) => b.status === 'paused')

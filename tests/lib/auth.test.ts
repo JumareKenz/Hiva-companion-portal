@@ -113,9 +113,12 @@ describe('lib/auth.ts', () => {
 
   describe('login flow', () => {
     it('should throw when platform login fails', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: false }))
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ detail: 'Invalid credentials' }),
+      }))
       const { login } = await import('@/lib/auth')
-      await expect(login('bad@test.com', 'password')).rejects.toThrow('Invalid credentials')
+      await expect(login('bad@test.com', 'password')).rejects.toMatchObject({ detail: 'Invalid credentials' })
     })
 
     it('should store tokens on successful login and exchange', async () => {
