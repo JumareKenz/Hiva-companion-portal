@@ -1,0 +1,31 @@
+'use client'
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+
+import { releasesService } from '@/services/releases.service'
+import type { ApiError } from '@/types/common'
+
+export function useReleases(params?: { page?: number; per_page?: number }) {
+  return useQuery({
+    queryKey: ['releases', params],
+    queryFn: () => releasesService.list(params),
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useActivateRelease() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => releasesService.activate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['releases'] })
+      queryClient.invalidateQueries({ queryKey: ['hivVersion'] })
+      toast.success('Release activated')
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.detail?.toString() || 'Failed to activate release')
+    },
+  })
+}

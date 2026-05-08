@@ -1,0 +1,90 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: React Functional Component with TypeScript
+// DESIGN SYSTEM: Follow AGENTS.md Design System section for all colors, spacing, radius, shadows, and motion.
+
+// [IMPORTS]: Import React, types, utilities, and child components
+// Follow AGENTS.md import order: React/Next → third-party → @/* → ./
+import React from 'react'
+import { cn } from '@/lib/utils'
+import type { [PROP_TYPE] } from '@/types/common'
+
+// [CONSTANTS]: Define any module-level constants or config maps here
+// Use `as const` for immutable config objects
+// For config maps that include Tailwind classes, always use design tokens (var(--*) or token names)
+const [CONSTANT_NAME] = {
+  [KEY]: '[VALUE]',
+} as const
+
+// [DESIGN_TOKENS]: When styling this component, reference these tokens from AGENTS.md:
+//   Colors:    var(--bg-primary), var(--surface), var(--text-primary), var(--accent-600)
+//   Spacing:   p-[var(--space-5)], gap-[var(--space-3)], m-[var(--space-4)]
+//   Radius:    rounded-[var(--radius-lg)], rounded-[var(--radius-sm)]
+//   Shadows:   shadow-[var(--shadow-sm)], shadow-[var(--shadow-glow)]
+//   Motion:    transition-all duration-[var(--duration-base)] ease-[var(--ease-out-expo)]
+//   Typography: font-display (Space Grotesk), font-body (Plus Jakarta Sans), font-mono (JetBrains Mono)
+
+// [TYPES]: Define the props interface for this component
+// Name must be [ComponentName]Props
+interface [COMPONENT_NAME]Props {
+  [PROP_NAME]: [PROP_TYPE]        // [DESCRIPTION of this prop — required]
+  [OPTIONAL_PROP]?: [PROP_TYPE]  // [DESCRIPTION of this optional prop]
+}
+
+/**
+ * [COMPONENT_NAME]
+ *
+ * [DESCRIPTION of what this component renders and when it is used]
+ * [REFERENCE to BLUEPRINT.md section if applicable]
+ * [REFERENCE to AGENTS.md Design System for styling rules]
+ */
+export function [COMPONENT_NAME]({
+  [PROP_NAME],
+  [OPTIONAL_PROP] = [DEFAULT_VALUE],
+}: [COMPONENT_NAME]Props) {
+  // [STATE]: Use useState for local UI state only (ephemeral, not server data)
+  const [[STATE_NAME], set[STATE_NAME]] = React.useState<[STATE_TYPE]>([INITIAL_VALUE])
+
+  // [EFFECTS]: Use useEffect for side effects (subscriptions, manual DOM manipulations)
+  React.useEffect(() => {
+    // [IMPLEMENTATION]: What this effect does and why
+
+    return () => {
+      // [CLEANUP]: Always cleanup subscriptions, timers, or event listeners
+    }
+  }, [/* dependencies */])
+
+  // [HANDLERS]: Define event handlers and callbacks
+  // Use useCallback if the handler is passed to a memoized child component
+  const handle[EVENT_NAME] = React.useCallback(() => {
+    // [IMPLEMENTATION]
+  }, [/* dependencies */])
+
+  // [DERIVED]: Compute derived values with useMemo if expensive or if object identity matters
+  const [DERIVED_VALUE] = React.useMemo(() => {
+    // [IMPLEMENTATION]
+    return [RESULT]
+  }, [/* dependencies */])
+
+  // [RENDER]: Return JSX. Use cn() for all conditional class names.
+  // Follow AGENTS.md: no `any`, no `ts-ignore`, no `dangerouslySetInnerHTML`
+  // Apply design tokens for ALL visual properties. Never hardcode hex values or px values.
+  // Add motion transitions to ALL interactive elements.
+  // Use semantic HTML elements (button, nav, article) where appropriate.
+  // Add aria-label to interactive elements without visible text.
+  return (
+    <div
+      className={cn(
+        // [BASE_CLASSES]: Always present classes using design tokens
+        // Example: 'bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)]',
+        '[BASE_CLASSES]',
+
+        // [CONDITIONAL_CLASSES]: Conditional classes using design tokens
+        // Example: '[CONDITION] && "bg-[var(--surface-raised)] shadow-[var(--shadow-sm)]"'
+        [CONDITION] && '[CONDITIONAL_CLASS]'
+      )}
+    >
+      {/* [CHILDREN]: Render children, conditionals, and mapped lists here */}
+      {/* For mapped lists, consider wrapping items in React.memo if they have stable IDs */}
+    </div>
+  )
+}

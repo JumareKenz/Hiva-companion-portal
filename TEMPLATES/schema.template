@@ -1,0 +1,88 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: Zod Validation Schema (for react-hook-form)
+
+// [IMPORTS]: Import Zod
+import { z } from 'zod'
+
+// [CONSTANTS]: Define shared validation constants
+// Extract magic numbers to named constants for readability and reuse
+const [MIN_LENGTH_NAME] = [NUMBER]
+const [MAX_LENGTH_NAME] = [NUMBER]
+const [MAX_FILE_SIZE_MB] = 50
+const [MAX_FILE_SIZE_BYTES] = [MAX_FILE_SIZE_MB] * 1024 * 1024
+
+/**
+ * [SCHEMA_NAME]
+ *
+ * [DESCRIPTION]: What this schema validates, which form uses it, and any special rules.
+ * [REFERENCE]: Link to BLUEPRINT.md data model if validating an entity
+ */
+export const [SCHEMA_NAME] = z.object({
+  // [STRING_FIELD]: Standard string validation
+  [FIELD_NAME]: z
+    .string()
+    .min([MIN_LENGTH_NAME], '[FIELD_NAME] must be at least [MIN_LENGTH] characters')
+    .max([MAX_LENGTH_NAME], '[FIELD_NAME] must be at most [MAX_LENGTH] characters'),
+
+  // [EMAIL_FIELD]: Email validation
+  [EMAIL_FIELD]: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Enter a valid work email'),
+
+  // [NUMBER_FIELD]: Numeric validation
+  [NUMBER_FIELD]: z
+    .number()
+    .min([MIN_VALUE], '[FIELD_NAME] must be at least [MIN_VALUE]')
+    .max([MAX_VALUE], '[FIELD_NAME] must be at most [MAX_VALUE]'),
+
+  // [ENUM_FIELD]: Enum validation using Zod native enum
+  [ENUM_FIELD]: z
+    .enum([[VALUE1], [VALUE2], [VALUE3]])
+    .default([DEFAULT_VALUE]),
+
+  // [OPTIONAL_FIELD]: Optional fields — may be omitted or undefined
+  [OPTIONAL_FIELD]: z
+    .string()
+    .optional(),
+
+  // [NULLABLE_FIELD]: Nullable fields — may be null
+  [NULLABLE_FIELD]: z
+    .string()
+    .nullable(),
+
+  // [ARRAY_FIELD]: Array validation
+  [ARRAY_FIELD]: z
+    .array(z.string())
+    .min(1, 'Select at least one [ITEM]'),
+
+  // [FILE_FIELD]: File validation (used in non-RHF contexts or combined with upload)
+  [FILE_FIELD]: z
+    .instanceof(File)
+    .refine((file) => file.size <= [MAX_FILE_SIZE_BYTES], {
+      message: 'File must be under [MAX_FILE_SIZE_MB]MB',
+    })
+    .refine((file) => ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type), {
+      message: 'Only PDF and DOCX files are allowed',
+    }),
+})
+
+// [CONDITIONAL_VALIDATION]: Use .refine() for cross-field validation
+// Example: reviewer_notes required when status === 'flagged'
+.refine(
+  (data) => {
+    // Return true if valid, false if invalid
+    if (data.[STATUS_FIELD] === 'flagged') {
+      return !!data.[NOTES_FIELD] && data.[NOTES_FIELD].length > 0
+    }
+    return true
+  },
+  {
+    message: 'Reviewer notes are required when flagging a block',
+    path: ['[NOTES_FIELD]'], // Which field to highlight on error
+  }
+)
+
+// [TYPE_INFERENCE]: Derive the TypeScript type from the schema
+// Use this type for form values and DTOs
+export type [SCHEMA_NAME]Type = z.infer<typeof [SCHEMA_NAME]>

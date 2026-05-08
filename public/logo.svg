@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Outer circle -->
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#155D46" stroke-width="3"/>
+  <!-- Inner dotted circle -->
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#155D46" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
+  <!-- H left vertical -->
+  <line x1="38" y1="28" x2="38" y2="72" stroke="#155D46" stroke-width="6" stroke-linecap="round"/>
+  <!-- H right vertical -->
+  <line x1="62" y1="28" x2="62" y2="72" stroke="#155D46" stroke-width="6" stroke-linecap="round"/>
+  <!-- H horizontal -->
+  <line x1="38" y1="50" x2="62" y2="50" stroke="#155D46" stroke-width="6" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="50" cy="50" r="5.5" fill="#C9A96E"/>
+</svg>

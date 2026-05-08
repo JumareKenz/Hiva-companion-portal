@@ -1,0 +1,66 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: API Service Layer Function
+
+// [IMPORTS]: Import the base api client and types
+// Never import React here — services are pure TypeScript
+import { api } from '@/services/http'
+import type { [ENTITY_TYPE], PaginatedResponse, ApiError } from '@/types/common'
+
+// [CONSTANTS]: Define service-level constants (endpoint paths, default params)
+const [ENDPOINT_PATH] = '/[DOMAIN]' as const
+
+/**
+ * [SERVICE_DESCRIPTION]
+ * What domain this service covers and which backend endpoints it wraps.
+ * All functions return Promises and throw ApiError on non-2xx responses.
+ */
+export const [SERVICE_NAME] = {
+  /**
+   * [METHOD_DESCRIPTION]
+   * What this function does, when to use it, and what business rules apply.
+   *
+   * Endpoint: [HTTP_METHOD] [FULL_PATH]
+   * Auth required: [YES/NO]
+   * Role restrictions: [admin/reviewer/none]
+   *
+   * @param [PARAM_NAME] - [DESCRIPTION of parameter]
+   * @returns [RETURN_DESCRIPTION]
+   * @throws {ApiError} on 4xx/5xx responses
+   */
+  async [METHOD_NAME](
+    [PARAM_NAME]: [PARAM_TYPE]
+  ): Promise<[RETURN_TYPE]> {
+    // [VALIDATION]: Perform lightweight client-side validation if needed
+    // Heavy validation belongs in Zod schemas (component/hook level)
+
+    // [API_CALL]: Use the appropriate api method:
+    //   api.get<T>(path, params?)    — for GET with query params
+    //   api.post<T>(path, body?)     — for POST with JSON body
+    //   api.patch<T>(path, body)     — for PATCH with JSON body
+    //   api.delete<T>(path)          — for DELETE
+    //   api.upload<T>(path, formData) — for multipart/form-data uploads
+    //   api.download(path)           — for Blob downloads
+    const [RESULT] = await api.[HTTP_METHOD]<[RETURN_TYPE]>(
+      `${[ENDPOINT_PATH]}/[PATH_SUFFIX]`,
+      [BODY_OR_PARAMS]
+    )
+
+    return [RESULT]
+  },
+
+  /**
+   * [SECOND_METHOD_DESCRIPTION]
+   *
+   * Endpoint: [HTTP_METHOD] [FULL_PATH]
+   */
+  async [SECOND_METHOD](
+    [SECOND_PARAM]: [SECOND_PARAM_TYPE]
+  ): Promise<[SECOND_RETURN_TYPE]> {
+    const [SECOND_RESULT] = await api.[SECOND_HTTP_METHOD]<[SECOND_RETURN_TYPE]>(
+      `${[ENDPOINT_PATH]}/[SECOND_PATH_SUFFIX]`,
+      [SECOND_BODY_OR_PARAMS]
+    )
+
+    return [SECOND_RESULT]
+  },
+}

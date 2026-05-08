@@ -1,0 +1,60 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: Next.js API Route Handler (App Router)
+// NOTE: This project primarily uses backend API at localhost:8700.
+// Only create Next.js API routes for edge cases not covered by rewrites.
+
+// [IMPORTS]: Import Next.js server types
+import { NextRequest, NextResponse } from 'next/server'
+
+// [CONSTANTS]: Allowed methods and validation schemas
+const [ALLOWED_METHODS] = ['GET', 'POST'] as const
+
+/**
+ * [ROUTE_DESCRIPTION]
+ * What this route does, which frontend feature uses it, and why it exists.
+ *
+ * Path: /api/[PATH]
+ * Methods: [METHODS]
+ * Auth: [REQUIRED/OPTIONAL]
+ */
+export async function [METHOD_NAME](request: NextRequest) {
+  try {
+    // [METHOD_CHECK]: Validate HTTP method if needed
+    // if (![ALLOWED_METHODS].includes(request.method)) {
+    //   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+    // }
+
+    // [AUTH_CHECK]: Verify authentication if required
+    // const authHeader = request.headers.get('authorization')
+    // if (!authHeader?.startsWith('Bearer ')) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
+
+    // [INPUT_VALIDATION]: Parse and validate request body or query params
+    // Use Zod schemas — never trust client input
+    const [BODY] = await request.json().catch(() => ({}))
+    // const validated = [ZOD_SCHEMA].parse([BODY])
+
+    // [QUERY_PARAMS]: Access search params via request.nextUrl.searchParams
+    // const page = request.nextUrl.searchParams.get('page') || '1'
+
+    // [BUSINESS_LOGIC]: Implement route logic here
+    // For proxy routes, prefer next.config.ts rewrites instead
+
+    // [RESPONSE]: Return standardized JSON response
+    return NextResponse.json(
+      {
+        [RESPONSE_FIELD]: [RESPONSE_VALUE],
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    // [ERROR_HANDLING]: Never leak internal details to client in production
+    console.error('[ROUTE_NAME] error:', error)
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

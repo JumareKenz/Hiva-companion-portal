@@ -1,0 +1,58 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: Zustand Store (with optional persistence)
+
+// [IMPORTS]: Import Zustand and middleware
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import type { [ENTITY_TYPE] } from '@/types/common'
+
+// [TYPES]: Define the complete store state shape and actions
+// State fields and actions must be explicitly typed — no implicit any
+interface [STORE_NAME]State {
+  // [STATE_FIELDS]: Declare all state properties with explicit types
+  // Use `| null` for entities that may not be loaded yet
+  [FIELD_NAME]: [FIELD_TYPE]
+
+  // [DERIVED_GETTERS]: Optional computed values (prefer selectors outside store)
+  // [GETTER_NAME]: () => [RETURN_TYPE]
+
+  // [ACTIONS]: Declare all action methods that modify state
+  [ACTION_NAME]: ([PARAM]: [PARAM_TYPE]) => void
+}
+
+/**
+ * [STORE_DESCRIPTION]
+ * What this store manages, which components use it, and its persistence strategy.
+ *
+ * Persistence: [YES/NO]
+ * Storage: [sessionStorage/localStorage/memory]
+ * Partialize: [Which fields are persisted and why]
+ */
+export const use[STORE_NAME]Store = create<[STORE_NAME]State>()(
+  // [MIDDLEWARE]: Add persist, devtools, or subscribeWithSelector if needed
+  // Only persist non-sensitive UI state or auth tokens (sessionStorage only)
+  persist(
+    (set, get) => ({
+      // [INITIAL_STATE]: Set explicit initial values for ALL state fields
+      [FIELD_NAME]: [INITIAL_VALUE],
+
+      // [ACTION_IMPLEMENTATIONS]: Implement actions that modify state
+      // Keep actions simple — business logic belongs in hooks/services
+      [ACTION_NAME]: ([PARAM]) => {
+        set({ [FIELD_NAME]: [PARAM] })
+      },
+
+      // [DERIVED_ACTION]: Use get() to read current state in actions
+      // [CHECKER_NAME]: () => get().[FIELD_NAME] === [CONDITION],
+    }),
+    {
+      name: '[STORAGE_KEY]', // Must be unique across all stores
+      storage: createJSONStorage(() => [sessionStorage]), // AGENTS.md: never localStorage for auth
+      partialize: (state) => ({
+        // [PERSISTED_FIELDS]: Only persist fields that should survive refresh
+        // NEVER persist sensitive data beyond the auth token
+        [FIELD_NAME]: state.[FIELD_NAME],
+      }),
+    }
+  )
+)

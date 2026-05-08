@@ -1,0 +1,65 @@
+// Copy this file, rename it, fill in the [PLACEHOLDERS]
+// TEMPLATE: Custom React Hook for Domain Logic
+
+// [IMPORTS]: Import React, TanStack Query, services, stores, types
+// Follow AGENTS.md import order: React/Next → third-party → @/* → ./
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { [SERVICE_NAME] } from '@/services/[DOMAIN].service'
+import type { [ENTITY_TYPE], ApiError } from '@/types/common'
+
+// [CONSTANTS]: Define query keys and config constants here
+// Query keys must be arrays: ['domain', param1, param2]
+const [QUERY_KEY] = '[DOMAIN]' as const
+const [STALE_TIME_MS] = [TIME_VALUE] // See AGENTS.md staleTime rules per entity type
+
+/**
+ * [HOOK_NAME]
+ *
+ * [DESCRIPTION of what this hook does, what data it fetches/mutates, and what it returns]
+ * [REFERENCE to BLUEPRINT.md state map section]
+ */
+export function [HOOK_NAME]([PARAM_NAME]: [PARAM_TYPE]) {
+  const queryClient = useQueryClient()
+
+  // [QUERY]: Use useQuery for read operations (GET endpoints)
+  // Always include staleTime and error handling
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: [[QUERY_KEY], [PARAM_NAME]],
+    queryFn: () => [SERVICE_NAME].[METHOD]([PARAM_NAME]),
+    staleTime: [STALE_TIME_MS],
+  })
+
+  // [MUTATION]: Use useMutation for write operations (POST/PATCH/DELETE)
+  // Always invalidate related queries on success
+  // Always show toast on error using ApiError.detail
+  const [MUTATION_NAME] = useMutation({
+    mutationFn: ([MUTATION_PARAM]: [MUTATION_TYPE]) =>
+      [SERVICE_NAME].[METHOD]([MUTATION_PARAM]),
+    onSuccess: () => {
+      // [INVALIDATION]: Invalidate related queries so UI refreshes automatically
+      queryClient.invalidateQueries({ queryKey: [[QUERY_KEY]] })
+      toast.success('[SUCCESS_MESSAGE]')
+    },
+    onError: (error: ApiError) => {
+      // [ERROR HANDLING]: Show user-friendly toast. Never log sensitive data.
+      toast.error(error.detail?.toString() || '[DEFAULT_ERROR_MESSAGE]')
+    },
+  })
+
+  // [RETURN]: Return a stable object shape so destructuring doesn't break
+  // Include data, loading states, error, mutate function, and mutation pending state
+  return {
+    [DATA_NAME]: data,
+    isLoading,
+    isError,
+    error,
+    [MUTATION_NAME]: [MUTATION_NAME].mutate,
+    is[Mutating]: [MUTATION_NAME].isPending,
+  } as const
+}
