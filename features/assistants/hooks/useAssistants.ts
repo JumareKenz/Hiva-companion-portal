@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { chatbotsService } from '@/services/chatbots.service'
 import { chatbotDocumentsService } from '@/services/chatbotDocuments.service'
 import { chatbotAnalyticsService } from '@/services/chatbotAnalytics.service'
-import type { ApiError, AgencyChatbot, ChatbotDocument, ChatbotStats, EmbedCode } from '@/types/common'
+import type { ApiError, AgencyChatbot, ChatbotDocument, EmbedCode } from '@/types/common'
 import type { ChatbotStatus } from '@/types/enums'
 
 /* ─── Chatbots ─── */
@@ -169,7 +169,7 @@ export function useDeleteChatbotDocument(chatbotId: string) {
 export function useChatbotStats(chatbotId: string) {
   return useQuery({
     queryKey: ['chatbotStats', chatbotId],
-    queryFn: () => chatbotAnalyticsService.getStats(chatbotId),
+    queryFn: () => chatbotAnalyticsService.getQualityMetrics(chatbotId),
     staleTime: 60 * 1000,
     enabled: !!chatbotId,
   })

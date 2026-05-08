@@ -19,6 +19,10 @@ export const chatbotDocumentsService = {
     return platformApi.get<ChatbotDocument>(`/agency/documents/${documentId}/status`)
   },
 
+  async reprocess(documentId: string): Promise<void> {
+    return platformApi.post<void>(`/agency/documents/${documentId}/reprocess`)
+  },
+
   async delete(documentId: string): Promise<void> {
     return platformApi.delete<void>(`/agency/documents/${documentId}`)
   },

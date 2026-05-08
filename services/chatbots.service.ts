@@ -1,38 +1,25 @@
 import { platformApi } from './platformHttp'
 import type { AgencyChatbot, PaginatedResponse } from '@/types/common'
-import type { ChatbotStatus, AgentMode, Language, PersonaTemplate } from '@/types/enums'
+import type { ChatbotStatus } from '@/types/enums'
 
 export interface CreateChatbotBody {
   name: string
-  slug: string
-  description?: string
-  organization_id: string
-  primary_language: Language
-  secondary_languages?: Language[]
-  persona_template: PersonaTemplate
-  system_prompt?: string
-  welcome_message?: string
-  fallback_message?: string
-  brand_color?: string
-  temperature?: number
-  top_k?: number
-  min_confidence?: number
-  enable_citations?: boolean
-  enable_grounding?: boolean
-  strict_domain?: boolean
-  agent_mode?: AgentMode
+  template: string
+  persona?: {
+    system_prompt?: string
+    welcome_message?: string
+    fallback_message?: string
+    brand_color?: string
+  }
+  rag_config?: {
+    temperature?: number
+    top_k?: number
+    min_confidence?: number
+    enable_citations?: boolean
+    enable_grounding?: boolean
+    strict_domain?: boolean
+  }
   domain_keywords?: string[]
-  tone?: {
-    formality: number
-    verbosity: number
-    empathy: number
-  }
-  guidelines?: {
-    citeSources: boolean
-    includePolicyNumbers: boolean
-    allowOffTopic: boolean
-    escalateComplex: boolean
-  }
 }
 
 export interface UpdateChatbotBody {
