@@ -2,6 +2,57 @@ import { platformApi } from './platformHttp'
 import type { AgencyChatbot, PaginatedResponse } from '@/types/common'
 import type { ChatbotStatus } from '@/types/enums'
 
+// Normalises every shape the platform API might return for a chatbot list.
+// Handles: raw array, { data/chatbots/items/results: [...] }, nested meta or flat total/count.
+function toPagedChatbots(
+  raw: unknown,
+  page: number,
+  perPage: number,
+): PaginatedResponse<AgencyChatbot> {
+  const empty = (): PaginatedResponse<AgencyChatbot> => ({
+    data: [],
+    meta: { total: 0, page, per_page: perPage, total_pages: 0 },
+  })
+
+  if (!raw) return empty()
+
+  // Plain array
+  if (Array.isArray(raw)) {
+    return { data: raw as AgencyChatbot[], meta: { total: raw.length, page, per_page: perPage, total_pages: 1 } }
+  }
+
+  if (typeof raw !== 'object') return empty()
+
+  const obj = raw as Record<string, unknown>
+
+  // Extract the chatbot array from any known key
+  const arr = (
+    Array.isArray(obj.data) ? obj.data :
+    Array.isArray(obj.chatbots) ? obj.chatbots :
+    Array.isArray(obj.items) ? obj.items :
+    Array.isArray(obj.results) ? obj.results :
+    null
+  ) as AgencyChatbot[] | null
+
+  if (!arr) return empty()
+
+  // Extract total from nested meta or flat fields
+  const meta = (obj.meta ?? {}) as Record<string, unknown>
+  const total =
+    typeof meta.total === 'number' ? meta.total :
+    typeof meta.count === 'number' ? meta.count :
+    typeof obj.total === 'number' ? obj.total :
+    typeof obj.count === 'number' ? obj.count :
+    arr.length
+
+  const totalPages =
+    typeof meta.total_pages === 'number' ? meta.total_pages :
+    typeof meta.pages === 'number' ? meta.pages :
+    Math.ceil(total / perPage) || 1
+
+  return { data: arr, meta: { total, page, per_page: perPage, total_pages: totalPages } }
+}
+
 export interface CreateChatbotBody {
   name: string
   template: string
@@ -43,7 +94,8 @@ export const chatbotsService = {
     per_page?: number
     status?: ChatbotStatus
   }): Promise<PaginatedResponse<AgencyChatbot>> {
-    return platformApi.get<PaginatedResponse<AgencyChatbot>>('/agency/chatbots', params)
+    const raw = await platformApi.get<unknown>('/agency/chatbots', params)
+    return toPagedChatbots(raw, params?.page ?? 1, params?.per_page ?? 20)
   },
 
   async create(body: CreateChatbotBody): Promise<AgencyChatbot> {

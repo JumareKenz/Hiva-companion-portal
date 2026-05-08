@@ -46,10 +46,7 @@ export default function AssistantsPage() {
   const { mutate: archive, isPending: isArchiving } = useArchiveChatbot()
   const { mutate: remove, isPending: isDeleting } = useDeleteChatbot()
 
-  // Normalise — API may return array, { data:[...] }, or { chatbots:[...] }
-  const items = Array.isArray(data)
-    ? data
-    : (data?.data ?? (data as unknown as { chatbots?: unknown[] })?.chatbots ?? [])
+  const items = data?.data ?? []
   const totalPages = data?.meta ? Math.ceil(data.meta.total / 20) : 1
 
   return (
@@ -99,7 +96,14 @@ export default function AssistantsPage() {
                   <EmptyState
                     icon={<AlertTriangle className="h-6 w-6 text-[var(--warning)]" />}
                     title="Failed to load assistants"
-                    description={(error as { detail?: string })?.detail || 'The assistant service may not be available yet.'}
+                    description={
+                      (() => {
+                        const e = error as { status?: number; detail?: unknown; message?: string } | null
+                        if (!e) return 'Unknown error'
+                        const detail = typeof e.detail === 'string' ? e.detail : e.message ?? 'Request failed'
+                        return e.status ? `${e.status} — ${detail}` : detail
+                      })()
+                    }
                   />
                 </td>
               </tr>

@@ -89,6 +89,39 @@ describe('services/chatbots.service.ts', () => {
       expect(url).toContain('/api/v1/')
       expect(url).not.toMatch(/\/api\/(?!v1)/)
     })
+
+    it('should normalise { items: [...], total: N } (FastAPI pagination shape)', async () => {
+      mockFetch.mockResolvedValueOnce(makeOk({ items: [chatbotFixture], total: 1, page: 1, size: 20, pages: 1 }))
+      const { chatbotsService } = await import('@/services/chatbots.service')
+      const result = await chatbotsService.list({ page: 1, per_page: 20 })
+      expect(result.data).toHaveLength(1)
+      expect(result.data[0].id).toBe('cb-1')
+      expect(result.meta.total).toBe(1)
+    })
+
+    it('should normalise { chatbots: [...] } shape', async () => {
+      mockFetch.mockResolvedValueOnce(makeOk({ chatbots: [chatbotFixture], total: 1 }))
+      const { chatbotsService } = await import('@/services/chatbots.service')
+      const result = await chatbotsService.list()
+      expect(result.data).toHaveLength(1)
+      expect(result.meta.total).toBe(1)
+    })
+
+    it('should normalise a raw array response', async () => {
+      mockFetch.mockResolvedValueOnce(makeOk([chatbotFixture]))
+      const { chatbotsService } = await import('@/services/chatbots.service')
+      const result = await chatbotsService.list()
+      expect(result.data).toHaveLength(1)
+      expect(result.meta.total).toBe(1)
+    })
+
+    it('should return empty data when response is unrecognised', async () => {
+      mockFetch.mockResolvedValueOnce(makeOk({ unexpected_key: 'whatever' }))
+      const { chatbotsService } = await import('@/services/chatbots.service')
+      const result = await chatbotsService.list()
+      expect(result.data).toEqual([])
+      expect(result.meta.total).toBe(0)
+    })
   })
 
   describe('create()', () => {
