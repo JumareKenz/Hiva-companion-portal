@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Key, Plus, Trash2, Edit3, Check, X, Globe, Users } from 'lucide-react'
+import { Key, Plus, Trash2, Edit3, Check, X, Globe, Users, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -10,6 +10,7 @@ import { accessCodesService, type CreateAccessCodeInput, type UpdateAccessCodeIn
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { LogoBackground } from '@/components/ui/LogoBackground'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { cn } from '@/lib/utils'
 import type { AccessCode } from '@/types/common'
 import { AdminOnly } from '@/components/guards/AdminOnly'
@@ -27,6 +28,7 @@ export default function AccessCodesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editState, setEditState] = useState<EditState | null>(null)
+  const [confirmingRevoke, setConfirmingRevoke] = useState<string | null>(null)
   const [createForm, setCreateForm] = useState<CreateAccessCodeInput>({
     name: '',
     max_users: undefined,
@@ -102,9 +104,9 @@ export default function AccessCodesPage() {
     updateMutation.mutate({ id: editState.id, input: payload })
   }
 
-  const handleRevoke = (code: AccessCode) => {
-    if (!confirm(`Revoke ${code.server_code}? Users with active sessions will be blocked on their next download.`)) return
-    revokeMutation.mutate(code.id)
+  const handleRevoke = (id: string) => {
+    setConfirmingRevoke(null)
+    revokeMutation.mutate(id)
   }
 
   const handleCreate = () => {
@@ -127,6 +129,7 @@ export default function AccessCodesPage() {
   const usedToday = codes.filter((c) => c.last_used_at && new Date(c.last_used_at) > new Date(Date.now() - 86400000)).length
 
   return (
+    <AdminGuard>
     <div className="relative space-y-8">
       <LogoBackground size={700} opacity={0.025} fixed={false} spin={false} breathe={false} />
 
@@ -282,14 +285,33 @@ export default function AccessCodesPage() {
                                 <Edit3 className="h-3.5 w-3.5" />
                               </button>
                               {code.is_active && (
-                                <button
-                                  onClick={() => handleRevoke(code)}
-                                  disabled={revokeMutation.isPending}
-                                  className="btn btn-ghost btn-sm text-[var(--error)]"
-                                  title="Revoke"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
+                                confirmingRevoke === code.id ? (
+                                  <div className="flex items-center gap-1">
+                                    <AlertTriangle className="h-3.5 w-3.5 text-[var(--error)]" />
+                                    <button
+                                      onClick={() => handleRevoke(code.id)}
+                                      disabled={revokeMutation.isPending}
+                                      className="btn btn-ghost btn-sm text-[var(--error)] font-semibold"
+                                    >
+                                      Revoke
+                                    </button>
+                                    <button
+                                      onClick={() => setConfirmingRevoke(null)}
+                                      className="btn btn-ghost btn-sm"
+                                    >
+                                      <X className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => setConfirmingRevoke(code.id)}
+                                    disabled={revokeMutation.isPending}
+                                    className="btn btn-ghost btn-sm text-[var(--error)]"
+                                    title="Revoke"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                )
                               )}
                             </>
                           )}
@@ -389,5 +411,6 @@ export default function AccessCodesPage() {
         </div>
       )}
     </div>
+    </AdminGuard>
   )
 }

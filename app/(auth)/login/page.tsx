@@ -119,9 +119,9 @@ export default function LoginPage() {
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="label">Password</label>
-                <button type="button" className="text-xs text-[var(--accent-600)] hover:underline">
-                  Forgot password?
-                </button>
+                <span className="text-xs text-[var(--text-faint)]">
+                  Contact your admin to reset
+                </span>
               </div>
               <div className="relative">
                 <input

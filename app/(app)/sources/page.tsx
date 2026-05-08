@@ -11,6 +11,7 @@ import { StatCard } from '@/components/ui/StatCard'
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Pagination } from '@/components/ui/Pagination'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { cn } from '@/lib/utils'
 import type { ChunkType } from '@/types/enums'
 
@@ -59,6 +60,7 @@ export default function SourcesPage() {
   }, [chunksData, typeFilter])
 
   return (
+    <AdminGuard>
     <div className="space-y-8">
       {/* Header */}
       <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">
@@ -245,6 +247,7 @@ export default function SourcesPage() {
         </div>
       )}
     </div>
+    </AdminGuard>
   )
 }
 

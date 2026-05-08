@@ -9,6 +9,7 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 
 import { useCreateChatbot } from '@/features/assistants/hooks/useAssistants'
 import { useAuthStore } from '@/stores/auth.store'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { cn } from '@/lib/utils'
 import type { Language, PersonaTemplate } from '@/types/enums'
 
@@ -162,6 +163,7 @@ export default function NewAssistantPage() {
   )
 
   return (
+    <AdminGuard>
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -482,6 +484,7 @@ export default function NewAssistantPage() {
         </div>
       </form>
     </div>
+    </AdminGuard>
   )
 }
 

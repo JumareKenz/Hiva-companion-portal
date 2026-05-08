@@ -37,6 +37,7 @@ class CompilerApiClient {
 
     if (res.status === 401) {
       clearTokens()
+      if (typeof window !== 'undefined') window.location.href = '/login'
       throw { status: 401, message: 'Unauthorized', detail: 'Session expired' } as ApiError
     }
 

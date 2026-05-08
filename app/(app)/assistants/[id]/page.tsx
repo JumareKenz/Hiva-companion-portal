@@ -31,6 +31,7 @@ import {
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { AdminOnly } from '@/components/guards/AdminOnly'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { cn } from '@/lib/utils'
 
 const TABS = ['Overview', 'Documents', 'Settings', 'Analytics'] as const
@@ -78,6 +79,7 @@ export default function AssistantDetailPage() {
   }
 
   return (
+    <AdminGuard>
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -326,6 +328,7 @@ export default function AssistantDetailPage() {
         </div>
       )}
     </div>
+    </AdminGuard>
   )
 }
 

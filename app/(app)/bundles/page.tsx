@@ -20,6 +20,7 @@ import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Pagination } from '@/components/ui/Pagination'
 import { AdminOnly } from '@/components/guards/AdminOnly'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 import { LogoBackground } from '@/components/ui/LogoBackground'
 import { cn } from '@/lib/utils'
 
@@ -54,6 +55,7 @@ export default function BundlesPage() {
   const totalPages = releasesData ? Math.ceil(releasesData.meta.total / 20) : 1
 
   return (
+    <AdminGuard>
     <div className="relative space-y-8">
       <LogoBackground size={700} opacity={0.025} fixed={false} spin={false} breathe={false} />
       {/* Header */}
@@ -231,5 +233,6 @@ export default function BundlesPage() {
         </div>
       )}
     </div>
+    </AdminGuard>
   )
 }

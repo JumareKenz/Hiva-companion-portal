@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { LogoBackground } from '@/components/ui/LogoBackground'
 import { BadgeCheck, Copy, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
+import { AdminGuard } from '@/features/auth/components/AdminGuard'
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user)
@@ -32,6 +33,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <AdminGuard>
     <div className="relative mx-auto max-w-3xl space-y-8">
       <LogoBackground size={600} opacity={0.02} fixed={false} spin={false} breathe={false} />
       <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Settings</h1>
@@ -96,5 +98,6 @@ export default function SettingsPage() {
         </div>
       </section>
     </div>
+    </AdminGuard>
   )
 }

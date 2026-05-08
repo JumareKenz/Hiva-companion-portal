@@ -12,8 +12,8 @@ import { useUploadDocument, useUploadProgress } from '@/features/documents/hooks
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 const uploadSchema = z.object({
-  name: z.string().min(1, 'Document name is required'),
-  source: z.string().min(1, 'Source organization is required'),
+  name: z.string().trim().min(1, 'Document name is required'),
+  source: z.string().trim().min(1, 'Source organization is required'),
   year: z.string().regex(/^\d{4}$/, 'Enter a valid year'),
   origin_language: z.string().default('English'),
 })
