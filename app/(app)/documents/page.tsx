@@ -53,10 +53,10 @@ export default function DocumentQueuePage() {
 
   const { mutate: deleteDoc } = useDeleteDocument()
 
-  const filteredItems =
-    data?.data.filter((d) =>
-      debouncedSearch ? d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) : true
-    ) ?? []
+  const rawItems = Array.isArray(data) ? data : (data?.data ?? [])
+  const filteredItems = rawItems.filter((d) =>
+    debouncedSearch ? d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) : true
+  )
 
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (sort === 'name') return a.name.localeCompare(b.name)

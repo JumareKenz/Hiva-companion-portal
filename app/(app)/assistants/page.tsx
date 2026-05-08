@@ -46,6 +46,7 @@ export default function AssistantsPage() {
   const { mutate: archive, isPending: isArchiving } = useArchiveChatbot()
   const { mutate: remove, isPending: isDeleting } = useDeleteChatbot()
 
+  const items = Array.isArray(data) ? data : (data?.data ?? [])
   const totalPages = data?.meta ? Math.ceil(data.meta.total / 20) : 1
 
   return (
@@ -99,7 +100,7 @@ export default function AssistantsPage() {
                   />
                 </td>
               </tr>
-            ) : data?.data.length === 0 ? (
+            ) : items.length === 0 ? (
               <tr>
                 <td colSpan={6}>
                   <EmptyState
@@ -110,7 +111,7 @@ export default function AssistantsPage() {
                 </td>
               </tr>
             ) : (
-              data?.data.map((assistant) => (
+              items.map((assistant) => (
                 <tr
                   key={assistant.id}
                   className="transition-colors hover:bg-[var(--bg-secondary)]"
