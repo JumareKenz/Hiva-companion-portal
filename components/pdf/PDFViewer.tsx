@@ -16,37 +16,79 @@ interface PDFViewerProps {
 }
 
 export default function PDFViewer({ filePath, pageNumber, scale = 1.2 }: PDFViewerProps) {
+  const isDocx = filePath.toLowerCase().endsWith('.docx')
+  
+  if (isDocx) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm text-[var(--text-muted)]">
+        <span>DOCX files require conversion to PDF for viewing</span>
+        <span className="text-xs text-[var(--text-faint)]">The document will be available as PDF after OCR processing</span>
+      </div>
+    )
+  }
+
   const [blobUrl, setBlobUrl] = useState<string | null>(null)
   const [numPages, setNumPages] = useState<number>(0)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
+    let revoked = false
+
     async function loadPdf() {
       try {
         const token = getCompilerToken()
 
-        const url = filePath.startsWith('http') ? filePath : `/api${filePath.startsWith('/') ? '' : '/'}${filePath}`
-        const res = await fetch(url, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        })
-        if (!res.ok) throw new Error('Failed to load PDF')
+        let url: string
+        if (filePath.startsWith('http')) {
+          url = filePath
+        } else if (filePath.startsWith('/storage/') || filePath.startsWith('/app/storage/')) {
+          url = `/api${filePath}`
+        } else {
+          url = `/api/${filePath.startsWith('/') ? filePath.slice(1) : filePath}`
+        }
+
+        const headers: HeadersInit = {}
+        if (token) headers['Authorization'] = `Bearer ${token}`
+
+        const res = await fetch(url, { headers })
+        if (!res.ok) throw new Error(`Failed to load PDF (${res.status})`)
         const blob = await res.blob()
-        setBlobUrl(URL.createObjectURL(blob))
+        if (cancelled) return
+        const objectUrl = URL.createObjectURL(blob)
+        if (cancelled) {
+          URL.revokeObjectURL(objectUrl)
+          revoked = true
+          return
+        }
+        setBlobUrl(objectUrl)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unable to load PDF')
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load PDF')
       }
     }
 
     loadPdf()
     return () => {
-      if (blobUrl) URL.revokeObjectURL(blobUrl)
+      cancelled = true
+      if (blobUrl && !revoked) URL.revokeObjectURL(blobUrl)
     }
   }, [filePath])
 
   if (error) {
+    const isDocx = filePath.toLowerCase().endsWith('.docx')
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-[var(--text-muted)]">
-        {error}
+      <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm text-[var(--text-muted)]">
+        {isDocx ? (
+          <>
+            <span>DOCX files require conversion to PDF for viewing</span>
+            <span className="text-xs text-[var(--text-faint)]">The document will be converted during the OCR process</span>
+          </>
+        ) : (
+          <>
+            <span>Unable to load PDF</span>
+            <span className="text-xs text-[var(--text-faint)]">{error}</span>
+          </>
+        )}
       </div>
     )
   }

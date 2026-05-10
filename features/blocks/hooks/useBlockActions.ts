@@ -53,3 +53,21 @@ export function useReprocessBlock(docId: string) {
     },
   })
 }
+
+export function useApproveAllBlocks(docId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const result = await blocksService.approveAll(docId)
+      return result
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['blocks', docId] })
+      toast.success(`Approved ${data.approved} blocks`)
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.detail?.toString() || 'Failed to approve blocks')
+    },
+  })
+}

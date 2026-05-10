@@ -1,51 +1,51 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
-import { useAuthStore } from '@/stores/auth.store'
-import { authService } from '@/services/auth.service'
 import { getCompilerToken, isTokenExpired } from '@/lib/auth'
+import { useAuthStore } from '@/stores/auth.store'
 import { LogoAnimated } from '@/components/ui/LogoAnimated'
 import { LogoBackground } from '@/components/ui/LogoBackground'
+import { authService } from '@/services/auth.service'
 
 interface AuthGuardProps {
   children: React.ReactNode
 }
 
+function readUser() {
+  return useAuthStore.getState().user
+}
+
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter()
-  const { user, setUser, clearUser } = useAuthStore()
-  const [isChecking, setIsChecking] = useState(true)
+
+  const token = getCompilerToken()
+  const user = readUser()
+
+  const isTokenValid = token && !isTokenExpired(token)
+  const hasUser = !!user
 
   useEffect(() => {
-    async function validate() {
-      const token = getCompilerToken()
-      if (!token || isTokenExpired(token)) {
-        clearUser()
-        router.replace('/login')
-        setIsChecking(false)
-        return
-      }
-
-      if (!user) {
-        try {
-          const me = await authService.me()
-          setUser(me)
-        } catch {
-          clearUser()
-          router.replace('/login')
-        }
-      }
-
-      setIsChecking(false)
+    if (!isTokenValid) {
+      useAuthStore.getState().clearUser()
+      router.replace('/login')
+      return
     }
 
-    validate()
-  }, [user, setUser, clearUser, router])
+    if (!hasUser) {
+      authService
+        .me()
+        .then((u) => useAuthStore.getState().setUser(u))
+        .catch(() => {
+          useAuthStore.getState().clearUser()
+          router.replace('/login')
+        })
+    }
+  }, [isTokenValid, hasUser, router])
 
-  if (isChecking) {
+  if (!isTokenValid || !hasUser) {
     return (
       <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-[var(--bg-primary)]">
         <LogoBackground size={500} opacity={0.05} fixed={false} spin breathe />

@@ -114,8 +114,8 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isUploading && onOpenChange(false)} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && !isUploading && onOpenChange(false)}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div ref={modalRef} className="relative w-full max-w-lg surface-overlay p-6">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-semibold text-[var(--text-primary)]">Upload clinical document</h2>
@@ -132,8 +132,9 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
             onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
             onDragLeave={() => setDragActive(false)}
             onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFile(e.dataTransfer.files[0]) }}
+            onClick={() => document.getElementById('file-input')?.click()}
             className={cn(
-              'flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-10 transition-colors',
+              'flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-10 transition-colors cursor-pointer',
               dragActive
                 ? 'border-[var(--accent-600)] bg-[var(--accent-600)]/5'
                 : 'border-[var(--border-default)] hover:border-[var(--accent-600)] hover:bg-[var(--accent-600)]/5'
@@ -151,7 +152,6 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
               onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
               id="file-input"
             />
-            <label htmlFor="file-input" className="absolute inset-0 cursor-pointer" />
           </div>
 
           {file && (

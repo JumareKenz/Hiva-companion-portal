@@ -23,4 +23,8 @@ export const blocksService = {
   async reprocess(id: string): Promise<Block> {
     return compilerApi.post<Block>(`/blocks/${id}/reprocess`)
   },
+
+  async approveAll(docId: string): Promise<{ approved: number }> {
+    return compilerApi.post<{ approved: number }>(`/documents/${docId}/approve-all`)
+  },
 }

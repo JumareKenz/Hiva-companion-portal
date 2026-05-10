@@ -70,8 +70,8 @@ export function CompileModal({ open, onOpenChange, documentId, documentName }: C
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isPending && onOpenChange(false)} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && !isPending && onOpenChange(false)}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div ref={modalRef} className="relative w-full max-w-md surface-overlay p-6">
         <h2 className="font-display text-xl font-semibold text-[var(--text-primary)]">
           Compile {documentName}

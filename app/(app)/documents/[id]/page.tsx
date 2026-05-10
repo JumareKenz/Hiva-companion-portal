@@ -3,16 +3,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useParams } from 'next/navigation'
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Rocket, CheckCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useDocument } from '@/features/documents/hooks/useDocuments'
-import { useBlocks, usePatchBlock, useReprocessBlock } from '@/features/blocks/hooks/useBlockActions'
-import { useMarkReady } from '@/features/documents/hooks/useDocuments'
+import { useDocument, useMarkReady } from '@/features/documents/hooks/useDocuments'
+import { CompileModal } from '@/features/documents/components/CompileModal'
+import { useBlocks, usePatchBlock, useReprocessBlock, useApproveAllBlocks } from '@/features/blocks/hooks/useBlockActions'
 import { BlockCard } from '@/features/blocks/components/BlockCard'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { FileTypeBadge } from '@/components/ui/FileTypeBadge'
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { AdminOnly } from '@/components/guards/AdminOnly'
+import { LogoAnimated } from '@/components/ui/LogoAnimated'
 
 const PDFViewer = dynamic(() => import('@/components/pdf/PDFViewer'), { ssr: false })
 
@@ -22,17 +23,20 @@ export default function DocumentReviewPage() {
   const [page, setPage] = useState(1)
   const [scale, setScale] = useState(1.2)
   const [focusedIndex, setFocusedIndex] = useState(0)
+  const [compileOpen, setCompileOpen] = useState(false)
 
   const { data: document, isLoading: docLoading } = useDocument(docId)
   const { data: blocksData, isLoading: blocksLoading } = useBlocks(docId, { page: 1, per_page: 50 })
   const { mutate: patchBlock } = usePatchBlock(docId)
   const { mutate: reprocessBlock } = useReprocessBlock(docId)
   const { mutate: markReady } = useMarkReady(docId)
+  const { mutate: approveAllBlocks, isPending: isApprovingAll } = useApproveAllBlocks(docId)
 
   const blocks = blocksData?.data ?? []
   const approvedCount = blocks.filter((b) => b.status === 'approved').length
   const flaggedCount = blocks.filter((b) => b.status === 'flagged').length
   const pendingCount = blocks.filter((b) => b.status === 'pending').length
+  const isReady = document?.status === 'ready_to_compile'
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -152,29 +156,73 @@ export default function DocumentReviewPage() {
 
           {/* Bottom bar */}
           <div className="flex items-center justify-between border-t border-[var(--border-default)] px-4 py-3">
-            <div>
-              <p className="text-sm text-[var(--text-muted)]">
-                {approvedCount} of {blocks.length} reviewed · {flaggedCount} flagged
-              </p>
-              <div className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
-                <div
-                  className="h-full rounded-full bg-[var(--accent-600)] transition-all"
-                  style={{ width: `${blocks.length > 0 ? (approvedCount / blocks.length) * 100 : 0}%` }}
-                />
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {blocksLoading ? 'Loading...' : `${approvedCount} of ${blocks.length} reviewed · ${flaggedCount} flagged`}
+                </p>
+                <div className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
+                  <div
+                    className="h-full rounded-full bg-[var(--accent-600)] transition-all"
+                    style={{ width: `${blocks.length > 0 ? (approvedCount / blocks.length) * 100 : 0}%` }}
+                  />
+                </div>
               </div>
+              {!blocksLoading && pendingCount > 0 && (
+                <button
+                  onClick={() => approveAllBlocks()}
+                  disabled={isApprovingAll}
+                  className="btn btn-secondary btn-sm bg-[var(--accent-600)] text-[var(--text-inverse)] hover:bg-[var(--accent-500)]"
+                >
+                  <CheckCheck className="h-3.5 w-3.5" />
+                  {isApprovingAll ? 'Processing...' : `Review All (${pendingCount})`}
+                </button>
+              )}
+              {!blocksLoading && pendingCount === 0 && blocks.length > 0 && (
+                <span className="text-xs text-[var(--success)]">All blocks reviewed</span>
+              )}
             </div>
             <AdminOnly>
-              <button
-                onClick={() => markReady()}
-                disabled={pendingCount > 0}
-                className="btn btn-primary btn-sm disabled:opacity-50"
-              >
-                Mark as Ready →
-              </button>
+              {isReady ? (
+                <button
+                  onClick={() => setCompileOpen(true)}
+                  className="btn btn-primary btn-sm"
+                >
+                  <Rocket className="h-3.5 w-3.5" />
+                  Compile →
+                </button>
+              ) : (
+                <button
+                  onClick={() => markReady()}
+                  disabled={pendingCount > 0}
+                  className="btn btn-primary btn-sm disabled:opacity-50"
+                >
+                  Mark as Ready →
+                </button>
+              )}
             </AdminOnly>
           </div>
         </div>
       </div>
+
+      {/* Loading Overlay */}
+      {isApprovingAll && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--bg-primary)]/90 backdrop-blur-sm">
+          <LogoAnimated size={64} className="text-[var(--accent-600)]" spin pulse dotPulse breathe />
+          <div className="mt-6 text-center">
+            <p className="font-display text-lg font-semibold text-[var(--text-primary)]">Processing Blocks</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">Approving all blocks...</p>
+            <p className="mt-1 text-xs text-[var(--text-faint)]">This may take a moment</p>
+          </div>
+        </div>
+      )}
+
+      <CompileModal
+        open={compileOpen}
+        onOpenChange={setCompileOpen}
+        documentId={docId}
+        documentName={document?.name ?? ''}
+      />
     </div>
   )
 }

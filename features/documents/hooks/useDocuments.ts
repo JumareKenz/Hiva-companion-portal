@@ -53,8 +53,16 @@ export function useMarkReady(id: string) {
       toast.success('Document marked as ready to compile')
     },
     onError: (error: ApiError) => {
-      if (error.status === 400 && typeof error.detail === 'object') {
-        toast.error('Some blocks are still unapproved')
+      if (error.status === 400) {
+        if (typeof error.detail === 'object' && error.detail !== null && 'pending_blocks' in error.detail) {
+          const { pending_blocks, flagged_blocks } = error.detail as { pending_blocks?: number; flagged_blocks?: number }
+          const parts: string[] = []
+          if (pending_blocks) parts.push(`${pending_blocks} pending`)
+          if (flagged_blocks) parts.push(`${flagged_blocks} flagged`)
+          toast.error(`Cannot compile: ${parts.join(', ')} block(s) must be resolved first`)
+        } else {
+          toast.error(error.detail?.toString() || 'Some blocks are still unapproved')
+        }
       } else {
         toast.error(error.detail?.toString() || 'Failed to mark ready')
       }
