@@ -16,8 +16,8 @@ import { LogoBackground } from '@/components/ui/LogoBackground'
 
 export default function DashboardPage() {
   const { data: docsData } = useQuery({
-    queryKey: ['documents', { per_page: 1 }],
-    queryFn: () => documentsService.list({ per_page: 1 }),
+    queryKey: ['documents', { per_page: 1, status: 'pending_review' }],
+    queryFn: () => documentsService.list({ per_page: 1, status: 'pending_review' }),
     staleTime: 30 * 1000,
   })
 
@@ -39,7 +39,7 @@ export default function DashboardPage() {
     staleTime: 120 * 1000,
   })
 
-  const pendingCount = docsData?.data.filter((d) => d.status !== 'compiled').length ?? 0
+  const pendingCount = docsData?.meta.total ?? 0
   const activeRelease = releasesData?.data[0]
   const languageCount = activeRelease?.languages.length ?? 0
 

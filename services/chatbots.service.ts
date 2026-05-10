@@ -48,6 +48,7 @@ function toPagedChatbots(
   const totalPages =
     typeof meta.total_pages === 'number' ? meta.total_pages :
     typeof meta.pages === 'number' ? meta.pages :
+    typeof obj.pages === 'number' ? obj.pages :
     Math.ceil(total / perPage) || 1
 
   return { data: arr, meta: { total, page, per_page: perPage, total_pages: totalPages } }
@@ -55,6 +56,7 @@ function toPagedChatbots(
 
 export interface CreateChatbotBody {
   name: string
+  slug?: string
   template: string
   persona?: {
     system_prompt?: string
@@ -94,8 +96,10 @@ export const chatbotsService = {
     per_page?: number
     status?: ChatbotStatus
   }): Promise<PaginatedResponse<AgencyChatbot>> {
-    const raw = await platformApi.get<unknown>('/agency/chatbots', params)
-    return toPagedChatbots(raw, params?.page ?? 1, params?.per_page ?? 20)
+    const { per_page, ...rest } = params ?? {}
+    const query = { ...rest, ...(per_page !== undefined ? { page_size: per_page } : {}) }
+    const raw = await platformApi.get<unknown>('/agency/chatbots', query)
+    return toPagedChatbots(raw, params?.page ?? 1, per_page ?? 20)
   },
 
   async create(body: CreateChatbotBody): Promise<AgencyChatbot> {

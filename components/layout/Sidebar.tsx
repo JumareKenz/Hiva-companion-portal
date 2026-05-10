@@ -24,6 +24,8 @@ import {
   Globe,
   FolderOpen,
   Key,
+  BarChart3,
+  MessageSquare,
 } from 'lucide-react'
 
 interface NavItem {
@@ -53,11 +55,14 @@ const SECTIONS: NavSection[] = [
   },
   {
     id: 'live',
-    label: 'LIVE CHATBOTS',
+    label: 'LIVE ASSISTANTS',
     icon: Globe,
     items: [
-      { href: '/assistants', label: 'Assistants', icon: Bot },
-      { href: '/deployments', label: 'Deployments', icon: Rocket },
+      { href: '/live-assistants', label: 'Assistants', icon: Bot },
+      { href: '/live-assistants/knowledge', label: 'Knowledge Base', icon: FileStack },
+      { href: '/live-assistants/chat', label: 'Chat & Test', icon: MessageSquare },
+      { href: '/live-assistants/analytics', label: 'Analytics', icon: BarChart3 },
+      { href: '/live-assistants/create', label: 'New Assistant', icon: Rocket },
     ],
   },
   {
@@ -103,7 +108,7 @@ function getSectionForPath(pathname: string): string | null {
   if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles')) {
     return 'hivaline'
   }
-  if (pathname.startsWith('/assistants') || pathname.startsWith('/deployments')) {
+  if (pathname.startsWith('/live-assistants')) {
     return 'live'
   }
   if (pathname.startsWith('/sources') || pathname.startsWith('/audit') || pathname.startsWith('/settings')) {

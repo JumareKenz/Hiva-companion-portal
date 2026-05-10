@@ -48,8 +48,12 @@ class MockResizeObserver {
 window.ResizeObserver = MockResizeObserver
 
 class MockIntersectionObserver {
+  readonly root: Element | null = null
+  readonly rootMargin: string = ''
+  readonly thresholds: number[] = []
   observe = vi.fn()
   unobserve = vi.fn()
   disconnect = vi.fn()
+  takeRecords = vi.fn().mockReturnValue([])
 }
 window.IntersectionObserver = MockIntersectionObserver

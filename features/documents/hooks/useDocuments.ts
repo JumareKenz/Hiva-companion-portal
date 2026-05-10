@@ -97,6 +97,7 @@ export function useCompileDocument() {
 }
 
 export function useUploadProgress() {
+  const queryClient = useQueryClient()
   const [progress, setProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
 
@@ -121,8 +122,9 @@ export function useUploadProgress() {
         setIsUploading(false)
         if (xhr.status >= 200 && xhr.status < 300) {
           const json = JSON.parse(xhr.responseText)
-          // Unwrap envelope if present
-          resolve(json.data ?? json)
+          const doc = json.data ?? json
+          queryClient.invalidateQueries({ queryKey: ['documents'] })
+          resolve(doc)
         } else {
           reject(new Error(xhr.statusText))
         }

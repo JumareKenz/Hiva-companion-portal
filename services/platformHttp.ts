@@ -36,8 +36,13 @@ class PlatformApiClient {
     })
 
     if (res.status === 401) {
-      clearTokens()
-      if (typeof window !== 'undefined') window.location.href = '/login'
+      // Only destroy the session when the agency API itself rejects the token.
+      // A 401 from /chatbots/* or /chat/* means a resource-level auth issue on a
+      // different host — the user's session is still valid, so don't log them out.
+      if (path.startsWith('/agency/')) {
+        clearTokens()
+        if (typeof window !== 'undefined') window.location.href = '/login'
+      }
       throw { status: 401, message: 'Unauthorized', detail: 'Session expired' } as ApiError
     }
 

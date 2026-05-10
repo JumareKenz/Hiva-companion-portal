@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Upload, X, FileText } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useUploadDocument, useUploadProgress } from '@/features/documents/hooks/useDocuments'
 
@@ -80,9 +81,13 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
   const handleFile = useCallback((f: File | null | undefined) => {
     if (!f) return
     if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(f.type)) {
+      toast.error('Only PDF and DOCX files are supported')
       return
     }
-    if (f.size > MAX_FILE_SIZE) return
+    if (f.size > MAX_FILE_SIZE) {
+      toast.error(`File too large — maximum is ${MAX_FILE_SIZE / 1024 / 1024} MB`)
+      return
+    }
     setFile(f)
   }, [])
 

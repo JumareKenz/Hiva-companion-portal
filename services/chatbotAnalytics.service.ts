@@ -31,8 +31,8 @@ export interface HourlyActivity {
 }
 
 export const chatbotAnalyticsService = {
-  async getQualityMetrics(chatbotId: string): Promise<QualityMetrics> {
-    return platformApi.get<QualityMetrics>(`/agency/chatbots/${chatbotId}/quality-metrics`)
+  async getQualityMetrics(chatbotId: string, params?: { days?: number }): Promise<QualityMetrics> {
+    return platformApi.get<QualityMetrics>(`/agency/chatbots/${chatbotId}/quality-metrics`, params)
   },
 
   async getAnomalies(chatbotId: string): Promise<unknown[]> {
@@ -43,20 +43,20 @@ export const chatbotAnalyticsService = {
     return platformApi.get(`/agency/chatbots/${chatbotId}/conversations`, params)
   },
 
-  async getSummary(): Promise<AnalyticsSummary> {
-    return platformApi.get<AnalyticsSummary>('/agency/analytics/summary')
+  async getSummary(params?: { days?: number }): Promise<AnalyticsSummary> {
+    return platformApi.get<AnalyticsSummary>('/agency/analytics/summary', params)
   },
 
-  async getTopQueries(): Promise<TopQuery[]> {
-    return platformApi.get<TopQuery[]>('/agency/analytics/top-queries')
+  async getTopQueries(params?: { days?: number }): Promise<TopQuery[]> {
+    return platformApi.get<TopQuery[]>('/agency/analytics/top-queries', params)
   },
 
-  async getIntentDistribution(): Promise<IntentDistribution[]> {
-    return platformApi.get<IntentDistribution[]>('/agency/analytics/intent-distribution')
+  async getIntentDistribution(params?: { days?: number }): Promise<IntentDistribution[]> {
+    return platformApi.get<IntentDistribution[]>('/agency/analytics/intent-distribution', params)
   },
 
-  async getHourlyActivity(): Promise<HourlyActivity[]> {
-    return platformApi.get<HourlyActivity[]>('/agency/analytics/hourly-activity')
+  async getHourlyActivity(params?: { days?: number }): Promise<HourlyActivity[]> {
+    return platformApi.get<HourlyActivity[]>('/agency/analytics/hourly-activity', params)
   },
 
   async getEmbedCode(chatbotId: string): Promise<EmbedCode> {

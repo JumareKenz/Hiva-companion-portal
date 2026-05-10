@@ -12,6 +12,7 @@ import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Pagination } from '@/components/ui/Pagination'
 import { AdminGuard } from '@/features/auth/components/AdminGuard'
+import { useDebounce } from '@/hooks/useDebounce'
 import { cn } from '@/lib/utils'
 import type { ChunkType } from '@/types/enums'
 
@@ -36,12 +37,14 @@ export default function SourcesPage() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<ChunkType | ''>('')
 
+  const debouncedSearch = useDebounce(search, 400)
+
   const { data: stats, isLoading: statsLoading } = useChunkStats()
   const { data: chunksData, isLoading: chunksLoading } = useChunks({
     page,
     per_page: 20,
-    search: search || undefined,
-    content_hash: /^[a-f0-9]{64}$/i.test(search) ? search : undefined,
+    search: debouncedSearch || undefined,
+    content_hash: /^[a-f0-9]{64}$/i.test(debouncedSearch) ? debouncedSearch : undefined,
     // Note: type filter is not supported by backend yet — filtered client-side
   })
 
@@ -241,7 +244,7 @@ export default function SourcesPage() {
         </table>
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 1 && !typeFilter && (
         <div className="flex justify-center">
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>

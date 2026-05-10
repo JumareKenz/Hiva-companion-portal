@@ -17,6 +17,9 @@ export function useJobStream(jobId: string) {
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const hasReconnected = useRef(false)
+  // Refs mirror state so WS callbacks don't capture stale closures
+  const isCompleteRef = useRef(false)
+  const isFailedRef = useRef(false)
 
   const connect = useCallback(() => {
     if (!jobId) return
@@ -42,6 +45,7 @@ export function useJobStream(jobId: string) {
         if (data.type === 'heartbeat') return
 
         if (data.step === 'complete') {
+          isCompleteRef.current = true
           setIsComplete(true)
           setCurrentStep('complete')
           setProgressPct(100)
@@ -50,6 +54,7 @@ export function useJobStream(jobId: string) {
         }
 
         if (data.step === 'failed') {
+          isFailedRef.current = true
           setIsFailed(true)
           setError(data.message || 'Job failed')
           setCurrentStep('failed')
@@ -77,7 +82,8 @@ export function useJobStream(jobId: string) {
         return
       }
 
-      if (!isComplete && !isFailed && !hasReconnected.current) {
+      // Use refs so the callback reads current values, not stale closure values
+      if (!isCompleteRef.current && !isFailedRef.current && !hasReconnected.current) {
         hasReconnected.current = true
         setConnectionStatus('reconnecting')
         reconnectTimeoutRef.current = setTimeout(() => {
@@ -91,7 +97,7 @@ export function useJobStream(jobId: string) {
     ws.onerror = () => {
       setConnectionStatus('disconnected')
     }
-  }, [jobId, isComplete, isFailed])
+  }, [jobId])
 
   useEffect(() => {
     setLogs([])
@@ -101,6 +107,8 @@ export function useJobStream(jobId: string) {
     setIsComplete(false)
     setIsFailed(false)
     setError(null)
+    isCompleteRef.current = false
+    isFailedRef.current = false
     hasReconnected.current = false
 
     connect()

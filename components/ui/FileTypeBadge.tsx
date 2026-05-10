@@ -3,11 +3,12 @@
 import { cn } from '@/lib/utils'
 
 interface FileTypeBadgeProps {
-  type: '.pdf' | '.docx'
+  type?: string | null
 }
 
 export function FileTypeBadge({ type }: FileTypeBadgeProps) {
-  const isPdf = type === '.pdf'
+  if (!type) return null
+  const isPdf = type.toLowerCase().includes('pdf')
 
   return (
     <span
@@ -18,7 +19,7 @@ export function FileTypeBadge({ type }: FileTypeBadgeProps) {
           : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400'
       )}
     >
-      {type.replace('.', '').toUpperCase()}
+      {type.replace(/^\./, '').toUpperCase()}
     </span>
   )
 }
