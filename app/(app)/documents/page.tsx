@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDocuments, useDeleteDocument } from '@/features/documents/hooks/useDocuments'
+import { useReleases } from '@/features/releases/hooks/useReleases'
 import { UploadModal } from '@/features/documents/components/UploadModal'
 import { CompileModal } from '@/features/documents/components/CompileModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -51,7 +52,15 @@ export default function DocumentQueuePage() {
     status: statusFilter,
   })
 
+  const { data: releasesData } = useReleases({ per_page: 100 })
   const { mutate: deleteDoc } = useDeleteDocument()
+
+  const getDocReleases = (docId: string): string[] => {
+    if (!releasesData?.data) return []
+    return releasesData.data
+      .filter((r) => r.document_ids.includes(docId))
+      .map((r) => r.version)
+  }
 
   const rawItems = Array.isArray(data) ? data : (data?.data ?? [])
   const filteredItems = rawItems.filter((d) =>
@@ -129,7 +138,7 @@ export default function DocumentQueuePage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[var(--border-subtle)]">
-              {['DOCUMENT', 'UPLOADED', 'STATUS', 'ACTIONS'].map((h) => (
+              {['DOCUMENT', 'UPLOADED', 'STATUS', 'IN RELEASES', 'ACTIONS'].map((h) => (
                 <th key={h} className="px-4 py-2.5 text-left label">
                   {h}
                 </th>
@@ -140,14 +149,14 @@ export default function DocumentQueuePage() {
             {isLoading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={4} className="px-4 py-2.5">
+                  <td colSpan={5} className="px-4 py-2.5">
                     <SkeletonLoader variant="row" />
                   </td>
                 </tr>
               ))
             ) : sortedItems.length === 0 ? (
               <tr>
-                <td colSpan={4}>
+                <td colSpan={5}>
           <EmptyState
               icon={<FileStack className="h-6 w-6 text-[var(--text-faint)]" />}
               title="No documents"
@@ -181,6 +190,21 @@ export default function DocumentQueuePage() {
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={doc.status} type="document" />
+                  </td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const releases = getDocReleases(doc.id)
+                      if (releases.length === 0) {
+                        return <span className="text-xs text-[var(--text-faint)]">—</span>
+                      }
+                      return (
+                        <div className="flex flex-wrap gap-1">
+                          {releases.map((v) => (
+                            <span key={v} className="badge badge-ghost text-[10px]">{v}</span>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">

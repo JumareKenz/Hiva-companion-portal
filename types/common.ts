@@ -104,6 +104,7 @@ export interface HivRelease {
   is_active: boolean
   needs_review: boolean
   created_at: string
+  document_ids: string[]
 }
 
 export interface ChunkLibraryEntry {

@@ -9,10 +9,13 @@ import {
   PackageCheck,
   ShieldCheck,
   AlertTriangle,
+  Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 import { releasesService } from '@/services/releases.service'
+import { documentsService } from '@/services/documents.service'
 import { hivService } from '@/services/hiv.service'
 import { useReleases, useActivateRelease } from '@/features/releases/hooks/useReleases'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -28,12 +31,26 @@ export default function BundlesPage() {
   const [page, setPage] = useState(1)
 
   const { data: releasesData, isLoading } = useReleases({ page, per_page: 20 })
+  const { data: documentsData } = useQuery({
+    queryKey: ['documentsAll'],
+    queryFn: () => documentsService.list({ per_page: 100 }),
+    staleTime: 30 * 1000,
+  })
   const { data: hivVersion } = useQuery({
     queryKey: ['hivVersion'],
     queryFn: () => hivService.version(),
     staleTime: 60 * 1000,
   })
   const { mutate: activate, isPending: isActivating } = useActivateRelease()
+
+  const documents = documentsData?.data ?? []
+
+  const getDocumentNames = (docIds: string[]) => {
+    return docIds.map((id) => {
+      const doc = documents.find((d) => d.id === id)
+      return doc?.name ?? id.slice(0, 8)
+    })
+  }
 
   const { mutate: downloadActive, isPending: isDownloading } = useMutation({
     mutationFn: async () => {
@@ -71,6 +88,12 @@ export default function BundlesPage() {
             </span>
           )}
         </div>
+        <AdminOnly>
+          <Link href="/bundles/build" className="btn btn-primary btn-sm">
+            <Plus className="h-4 w-4" />
+            Build Bundle
+          </Link>
+        </AdminOnly>
       </div>
 
       {/* Active release hero */}
@@ -130,7 +153,7 @@ export default function BundlesPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[var(--border-subtle)]">
-              {['VERSION', 'LANGUAGES', 'SIZE', 'CHUNKS', 'STATUS', 'ACTIONS'].map((h) => (
+              {['VERSION', 'DOCUMENTS', 'SIZE', 'CHUNKS', 'STATUS', 'ACTIONS'].map((h) => (
                 <th key={h} className="px-4 py-2.5 text-left label">
                   {h}
                 </th>
@@ -172,9 +195,9 @@ export default function BundlesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                      {release.languages.map((lang) => (
-                        <span key={lang} className="badge badge-ghost text-[10px]">
-                          {lang.toUpperCase()}
+                      {getDocumentNames(release.document_ids).map((name, i) => (
+                        <span key={i} className="badge badge-ghost text-[10px] max-w-[80px] truncate" title={name}>
+                          {name}
                         </span>
                       ))}
                     </div>
