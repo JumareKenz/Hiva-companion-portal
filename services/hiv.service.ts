@@ -2,9 +2,10 @@ import { compilerApi } from './compilerHttp'
 import type { HivVersion } from '@/types/common'
 
 export const hivService = {
-  async version(): Promise<HivVersion> {
-    // Public endpoint — no auth required
-    return fetch('/api/hiv/version').then((res) => res.json())
+  async version(): Promise<HivVersion | null> {
+    const res = await fetch('/api/hiv/version')
+    if (!res.ok) return null
+    return res.json()
   },
 
   async download(): Promise<Blob> {

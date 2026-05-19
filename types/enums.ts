@@ -1,4 +1,5 @@
 export type DocumentStatus =
+  | 'uploaded'
   | 'pending_review'
   | 'in_review'
   | 'ready_to_compile'

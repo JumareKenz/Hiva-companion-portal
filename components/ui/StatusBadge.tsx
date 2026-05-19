@@ -7,6 +7,7 @@ const DOCUMENT_STATUS_CONFIG: Record<
   DocumentStatus,
   { label: string; class: string; dot?: boolean; pulse?: boolean }
 > = {
+  uploaded: { label: 'Uploaded', class: 'badge-ghost', dot: false, pulse: false },
   pending_review: { label: 'Pending Review', class: 'badge-ghost', dot: false, pulse: false },
   in_review: { label: 'In Review', class: 'badge-warning', dot: true, pulse: false },
   ready_to_compile: { label: 'Ready to Compile', class: 'badge-accent', dot: true, pulse: false },
@@ -36,6 +37,10 @@ export function StatusBadge({ status, type }: StatusBadgeProps) {
   const config: StatusConfig = type === 'document'
     ? DOCUMENT_STATUS_CONFIG[status as DocumentStatus]
     : JOB_STATUS_CONFIG[status as JobStatus]
+
+  if (!config) {
+    return <span className="badge badge-ghost">{status}</span>
+  }
 
   const hasDot = config.dot ?? false
   const hasPulse = config.pulse ?? false

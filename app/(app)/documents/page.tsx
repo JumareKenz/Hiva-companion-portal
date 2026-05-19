@@ -29,6 +29,7 @@ import type { DocumentStatus } from '@/types/enums'
 
 const TABS: { label: string; value?: DocumentStatus }[] = [
   { label: 'All' },
+  { label: 'Uploaded', value: 'uploaded' },
   { label: 'Pending Review', value: 'pending_review' },
   { label: 'In Review', value: 'in_review' },
   { label: 'Ready', value: 'ready_to_compile' },
