@@ -2,6 +2,10 @@ import type {
   DocumentStatus,
   BlockType,
   BlockStatus,
+  BundleJobStatus,
+  PipelineStage,
+  ReviewDecision,
+  ReviewStatus,
   JobStatus,
   JobStep,
   ChunkType,
@@ -105,6 +109,51 @@ export interface HivRelease {
   needs_review: boolean
   created_at: string
   document_ids: string[]
+}
+
+export interface BundleJob {
+  id: string
+  status: BundleJobStatus
+  current_stage: PipelineStage | null
+  progress: number
+  document_ids: string[]
+  languages: Language[]
+  activate_on_complete: boolean
+  release_id: string | null
+  error_message: string | null
+  created_by: { id: string; full_name: string }
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+}
+
+export interface RuleForReview {
+  chunk_id: string
+  rule_index: number
+  display_title: string
+  rule_type: 'decision_tree' | 'calculator' | 'protocol' | 'checklist'
+  raw_text: string
+  plain_language: string
+  structured_content: Record<string, unknown>
+  status: ReviewStatus
+  reviewer_notes: string | null
+  reviewed_at: string | null
+}
+
+export interface RuleReviewSubmission {
+  decision: ReviewDecision
+  edited_content?: Record<string, unknown>
+  notes?: string
+}
+
+export interface ReviewStatusSummary {
+  total_rules: number
+  pending_count: number
+  approved_count: number
+  edited_count: number
+  rejected_count: number
+  can_package: boolean
+  blocking_issues: string[]
 }
 
 export interface ChunkLibraryEntry {

@@ -6,16 +6,18 @@ import { useRouter } from 'next/navigation'
 import {
   FileStack,
   Eye,
-  Play,
+  CheckCircle2,
   Trash2,
   ChevronDown,
   Search,
+  Rocket,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
 import { useDocuments, useDeleteDocument } from '@/features/documents/hooks/useDocuments'
-import { useReleases } from '@/features/releases/hooks/useReleases'
+import { documentsService } from '@/services/documents.service'
 import { UploadModal } from '@/features/documents/components/UploadModal'
-import { CompileModal } from '@/features/documents/components/CompileModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { FileTypeBadge } from '@/components/ui/FileTypeBadge'
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
@@ -30,22 +32,21 @@ import type { DocumentStatus } from '@/types/enums'
 const TABS: { label: string; value?: DocumentStatus }[] = [
   { label: 'All' },
   { label: 'Uploaded', value: 'uploaded' },
-  { label: 'Pending Review', value: 'pending_review' },
-  { label: 'In Review', value: 'in_review' },
   { label: 'Ready', value: 'ready_to_compile' },
+  { label: 'Compiling', value: 'compiling' },
   { label: 'Compiled', value: 'compiled' },
   { label: 'Failed', value: 'failed' },
 ]
 
 export default function DocumentQueuePage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<DocumentStatus | undefined>()
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 400)
   const [sort, setSort] = useState<'recent' | 'name'>('recent')
   const [uploadOpen, setUploadOpen] = useState(false)
-  const [compileDoc, setCompileDoc] = useState<{ id: string; name: string } | null>(null)
 
   const { data, isLoading } = useDocuments({
     page,
@@ -53,15 +54,16 @@ export default function DocumentQueuePage() {
     status: statusFilter,
   })
 
-  const { data: releasesData } = useReleases({ per_page: 100 })
   const { mutate: deleteDoc } = useDeleteDocument()
 
-  const getDocReleases = (docId: string): string[] => {
-    if (!releasesData?.data) return []
-    return releasesData.data
-      .filter((r) => r.document_ids.includes(docId))
-      .map((r) => r.version)
-  }
+  const { mutate: markReady, isPending: isMarkingReady } = useMutation({
+    mutationFn: (id: string) => documentsService.markReady(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] })
+      toast.success('Document marked as ready to compile')
+    },
+    onError: () => toast.error('Failed to mark document ready'),
+  })
 
   const rawItems = Array.isArray(data) ? data : (data?.data ?? [])
   const filteredItems = rawItems.filter((d) =>
@@ -78,17 +80,26 @@ export default function DocumentQueuePage() {
   return (
     <div className="relative space-y-6">
       <LogoBackground size={700} opacity={0.025} fixed={false} spin={false} breathe={false} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Document Queue</h1>
+          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Documents</h1>
           {data?.meta && (
-            <span className="badge badge-accent">{data.meta.total} documents</span>
+            <span className="badge badge-accent">{data.meta.total}</span>
           )}
         </div>
-        <button onClick={() => setUploadOpen(true)} className="btn btn-primary btn-sm">
-          Upload Document
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setUploadOpen(true)} className="btn btn-primary btn-sm">
+            Upload Document
+          </button>
+          <AdminOnly>
+            <Link href="/bundles/build" className="btn btn-secondary btn-sm">
+              <Rocket className="h-4 w-4" />
+              Build Bundle
+            </Link>
+          </AdminOnly>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -115,7 +126,7 @@ export default function DocumentQueuePage() {
           <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-faint)]" />
           <input
             type="text"
-            placeholder="Search documents…"
+            placeholder="Search documents..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input pl-9 text-sm"
@@ -128,7 +139,7 @@ export default function DocumentQueuePage() {
             className="input appearance-none pr-8 text-sm"
           >
             <option value="recent">Most recent</option>
-            <option value="name">Name A–Z</option>
+            <option value="name">Name A-Z</option>
           </select>
           <ChevronDown className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 pointer-events-none text-[var(--text-faint)]" />
         </div>
@@ -139,52 +150,41 @@ export default function DocumentQueuePage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[var(--border-subtle)]">
-              {['DOCUMENT', 'UPLOADED', 'STATUS', 'IN RELEASES', 'ACTIONS'].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-left label">
-                  {h}
-                </th>
+              {['DOCUMENT', 'SOURCE', 'UPLOADED', 'STATUS', 'ACTIONS'].map((h) => (
+                <th key={h} className="px-4 py-2.5 text-left label">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {isLoading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i}>
-                  <td colSpan={5} className="px-4 py-2.5">
-                    <SkeletonLoader variant="row" />
-                  </td>
-                </tr>
+                <tr key={i}><td colSpan={5} className="px-4 py-2.5"><SkeletonLoader variant="row" /></td></tr>
               ))
             ) : sortedItems.length === 0 ? (
-              <tr>
-                <td colSpan={5}>
-          <EmptyState
-              icon={<FileStack className="h-6 w-6 text-[var(--text-faint)]" />}
-              title="No documents"
-              description="Upload your first clinical document to get started."
-              action={{ label: 'Upload Document', onClick: () => setUploadOpen(true) }}
-            />
-                </td>
-              </tr>
+              <tr><td colSpan={5}>
+                <EmptyState
+                  icon={<FileStack className="h-6 w-6 text-[var(--text-faint)]" />}
+                  title="No documents"
+                  description="Upload your first clinical document to get started."
+                  action={{ label: 'Upload Document', onClick: () => setUploadOpen(true) }}
+                />
+              </td></tr>
             ) : (
               sortedItems.map((doc) => (
-                <tr
-                  key={doc.id}
-                  className="group transition-colors hover:bg-[var(--bg-secondary)]"
-                >
+                <tr key={doc.id} className="group transition-colors hover:bg-[var(--bg-secondary)]">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <FileTypeBadge type={doc.file_extension} />
-                      <div>
-                        <Link
-                          href={`/documents/${doc.id}`}
-                          className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent-600)]"
-                        >
-                          {doc.name}
-                        </Link>
-                        <div className="text-xs text-[var(--text-muted)]">{doc.source}</div>
-                      </div>
+                      <Link
+                        href={`/documents/${doc.id}`}
+                        className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent-600)]"
+                      >
+                        {doc.name}
+                      </Link>
                     </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-[var(--text-muted)]">
+                    {doc.source}
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--text-secondary)]">
                     {format(new Date(doc.created_at), 'd MMM yyyy')}
@@ -193,40 +193,31 @@ export default function DocumentQueuePage() {
                     <StatusBadge status={doc.status} type="document" />
                   </td>
                   <td className="px-4 py-3">
-                    {(() => {
-                      const releases = getDocReleases(doc.id)
-                      if (releases.length === 0) {
-                        return <span className="text-xs text-[var(--text-faint)]">—</span>
-                      }
-                      return (
-                        <div className="flex flex-wrap gap-1">
-                          {releases.map((v) => (
-                            <span key={v} className="badge badge-ghost text-[10px]">{v}</span>
-                          ))}
-                        </div>
-                      )
-                    })()}
-                  </td>
-                  <td className="px-4 py-3">
                     <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Link
                         href={`/documents/${doc.id}`}
                         className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-600)]"
+                        title="View details"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
                       <AdminOnly>
-                        {doc.status === 'ready_to_compile' && (
+                        {doc.status === 'uploaded' && (
                           <button
-                            onClick={() => setCompileDoc({ id: doc.id, name: doc.name })}
-                            className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-600)]"
+                            onClick={() => markReady(doc.id)}
+                            disabled={isMarkingReady}
+                            className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--success)]"
+                            title="Mark ready to compile"
                           >
-                            <Play className="h-4 w-4" />
+                            <CheckCircle2 className="h-4 w-4" />
                           </button>
                         )}
                         <button
-                          onClick={() => deleteDoc(doc.id)}
+                          onClick={() => {
+                            if (confirm('Delete this document?')) deleteDoc(doc.id)
+                          }}
                           className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--error)]"
+                          title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -247,14 +238,6 @@ export default function DocumentQueuePage() {
       )}
 
       <UploadModal open={uploadOpen} onOpenChange={setUploadOpen} />
-      {compileDoc && (
-        <CompileModal
-          open={!!compileDoc}
-          onOpenChange={(open) => !open && setCompileDoc(null)}
-          documentId={compileDoc.id}
-          documentName={compileDoc.name}
-        />
-      )}
     </div>
   )
 }

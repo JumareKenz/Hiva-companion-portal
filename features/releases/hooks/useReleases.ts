@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 
 import { releasesService, type BuildReleaseRequest } from '@/services/releases.service'
 import type { ApiError } from '@/types/common'
-import type { Language } from '@/types/enums'
 
 export function useReleases(params?: { page?: number; per_page?: number }) {
   return useQuery({
@@ -38,11 +37,10 @@ export function useBuildRelease() {
     mutationFn: (body: BuildReleaseRequest) => releasesService.build(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['releases'] })
-      queryClient.invalidateQueries({ queryKey: ['documents'] })
-      toast.success('Release built successfully')
+      queryClient.invalidateQueries({ queryKey: ['bundleJobs'] })
     },
     onError: (error: ApiError) => {
-      toast.error(error.detail?.toString() || 'Failed to build release')
+      toast.error(error.detail?.toString() || 'Failed to start build')
     },
   })
 }

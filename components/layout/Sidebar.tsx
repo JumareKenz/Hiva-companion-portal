@@ -43,13 +43,13 @@ interface NavSection {
 
 const SECTIONS: NavSection[] = [
   {
-    id: 'hivaline',
-    label: 'HIVALINE ASSISTANT',
+    id: 'compiler',
+    label: 'HIVALINE COMPILER',
     icon: Smartphone,
     items: [
-      { href: '/', label: 'Home', icon: LayoutDashboard },
-      { href: '/documents', label: 'Document Queue', icon: FileStack },
-      { href: '/bundles', label: 'Compiled Bundles', icon: Package },
+      { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/documents', label: 'Documents', icon: FileStack },
+      { href: '/bundles', label: 'Bundles & Builds', icon: Package },
       { href: '/access-codes', label: 'Access Codes', icon: Key },
     ],
   },
@@ -80,20 +80,17 @@ const SECTIONS: NavSection[] = [
 const STORAGE_KEY = 'hiva-sidebar-sections'
 
 function getInitialExpanded(pathname: string): Record<string, boolean> {
-  // Default: all sections expanded
   const defaultState: Record<string, boolean> = {
-    hivaline: true,
+    compiler: true,
     live: true,
     workspace: true,
   }
 
-  // Try load from storage
   if (typeof window !== 'undefined') {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved) as Record<string, boolean>
-        // Merge with defaults (new sections default to expanded)
         return { ...defaultState, ...parsed }
       }
     } catch {
@@ -105,8 +102,8 @@ function getInitialExpanded(pathname: string): Record<string, boolean> {
 }
 
 function getSectionForPath(pathname: string): string | null {
-  if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles')) {
-    return 'hivaline'
+  if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles') || pathname.startsWith('/access-codes')) {
+    return 'compiler'
   }
   if (pathname.startsWith('/live-assistants')) {
     return 'live'
@@ -125,7 +122,6 @@ export function Sidebar() {
     getInitialExpanded(pathname)
   )
 
-  // Auto-expand section containing active route
   useEffect(() => {
     const activeSection = getSectionForPath(pathname)
     if (activeSection && !expanded[activeSection]) {
@@ -167,7 +163,7 @@ export function Sidebar() {
         <LogoAnimated size={32} className="text-white" spin pulse dotPulse />
         <div className="flex flex-col">
           <span className="font-display text-sm font-bold leading-none">HIVA</span>
-          <span className="text-[10px] leading-none text-white/50">Companion Portal</span>
+          <span className="text-[10px] leading-none text-white/50">Platform</span>
         </div>
       </div>
 

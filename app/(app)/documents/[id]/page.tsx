@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Rocket, CheckCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDocument, useMarkReady } from '@/features/documents/hooks/useDocuments'
-import { CompileModal } from '@/features/documents/components/CompileModal'
 import { useBlocks, usePatchBlock, useReprocessBlock, useApproveAllBlocks } from '@/features/blocks/hooks/useBlockActions'
 import { BlockCard } from '@/features/blocks/components/BlockCard'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -19,11 +18,11 @@ const PDFViewer = dynamic(() => import('@/components/pdf/PDFViewer'), { ssr: fal
 
 export default function DocumentReviewPage() {
   const params = useParams()
+  const router = useRouter()
   const docId = params.id as string
   const [page, setPage] = useState(1)
   const [scale, setScale] = useState(1.2)
   const [focusedIndex, setFocusedIndex] = useState(0)
-  const [compileOpen, setCompileOpen] = useState(false)
 
   const { data: document, isLoading: docLoading } = useDocument(docId)
   const { data: blocksData, isLoading: blocksLoading } = useBlocks(docId, { page: 1, per_page: 50 })
@@ -185,11 +184,11 @@ export default function DocumentReviewPage() {
             <AdminOnly>
               {isReady ? (
                 <button
-                  onClick={() => setCompileOpen(true)}
+                  onClick={() => router.push('/bundles/build')}
                   className="btn btn-primary btn-sm"
                 >
                   <Rocket className="h-3.5 w-3.5" />
-                  Compile →
+                  Build Bundle →
                 </button>
               ) : (
                 <button
@@ -217,12 +216,6 @@ export default function DocumentReviewPage() {
         </div>
       )}
 
-      <CompileModal
-        open={compileOpen}
-        onOpenChange={setCompileOpen}
-        documentId={docId}
-        documentName={document?.name ?? ''}
-      />
     </div>
   )
 }
