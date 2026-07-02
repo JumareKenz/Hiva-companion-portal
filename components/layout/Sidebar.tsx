@@ -12,20 +12,15 @@ import {
   LayoutDashboard,
   FileStack,
   Package,
-  Rocket,
   Library,
   ScrollText,
   Settings,
   LogOut,
-  Bot,
   ChevronDown,
   ChevronRight,
-  Smartphone,
-  Globe,
+  Cpu,
   FolderOpen,
   Key,
-  BarChart3,
-  MessageSquare,
 } from 'lucide-react'
 
 interface NavItem {
@@ -44,8 +39,8 @@ interface NavSection {
 const SECTIONS: NavSection[] = [
   {
     id: 'compiler',
-    label: 'HIVALINE COMPILER',
-    icon: Smartphone,
+    label: 'HIVA-OS COMPILER',
+    icon: Cpu,
     items: [
       { href: '/', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/documents', label: 'Documents', icon: FileStack },
@@ -54,23 +49,11 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    id: 'live',
-    label: 'LIVE ASSISTANTS',
-    icon: Globe,
-    items: [
-      { href: '/live-assistants', label: 'Assistants', icon: Bot },
-      { href: '/live-assistants/knowledge', label: 'Knowledge Base', icon: FileStack },
-      { href: '/live-assistants/chat', label: 'Chat & Test', icon: MessageSquare },
-      { href: '/live-assistants/analytics', label: 'Analytics', icon: BarChart3 },
-      { href: '/live-assistants/create', label: 'New Assistant', icon: Rocket },
-    ],
-  },
-  {
     id: 'workspace',
     label: 'WORKSPACE',
     icon: FolderOpen,
     items: [
-      { href: '/sources', label: 'Sources', icon: Library },
+      { href: '/sources', label: 'Chunk Library', icon: Library },
       { href: '/audit', label: 'Audit Log', icon: ScrollText },
       { href: '/settings', label: 'Settings', icon: Settings },
     ],
@@ -82,7 +65,6 @@ const STORAGE_KEY = 'hiva-sidebar-sections'
 function getInitialExpanded(pathname: string): Record<string, boolean> {
   const defaultState: Record<string, boolean> = {
     compiler: true,
-    live: true,
     workspace: true,
   }
 
@@ -104,9 +86,6 @@ function getInitialExpanded(pathname: string): Record<string, boolean> {
 function getSectionForPath(pathname: string): string | null {
   if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles') || pathname.startsWith('/access-codes')) {
     return 'compiler'
-  }
-  if (pathname.startsWith('/live-assistants')) {
-    return 'live'
   }
   if (pathname.startsWith('/sources') || pathname.startsWith('/audit') || pathname.startsWith('/settings')) {
     return 'workspace'
@@ -162,8 +141,8 @@ export function Sidebar() {
       <div className="relative flex h-14 shrink-0 items-center gap-2.5 px-5">
         <LogoAnimated size={32} className="text-white" spin pulse dotPulse />
         <div className="flex flex-col">
-          <span className="font-display text-sm font-bold leading-none">HIVA</span>
-          <span className="text-[10px] leading-none text-white/50">Platform</span>
+          <span className="font-display text-sm font-bold leading-none">HIVA-OS</span>
+          <span className="text-[10px] leading-none text-white/50">Compiler Portal</span>
         </div>
       </div>
 

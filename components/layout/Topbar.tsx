@@ -22,8 +22,7 @@ export function Topbar() {
     if (pathname.startsWith('/documents/')) return 'Document Details'
     if (pathname.startsWith('/documents')) return 'Documents'
     if (pathname.startsWith('/access-codes')) return 'Access Codes'
-    if (pathname.startsWith('/live-assistants')) return 'Live Assistants'
-    if (pathname.startsWith('/sources')) return 'Sources'
+    if (pathname.startsWith('/sources')) return 'Chunk Library'
     if (pathname.startsWith('/audit')) return 'Audit Log'
     if (pathname.startsWith('/settings')) return 'Settings'
     return pathname.split('/')[1]?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
@@ -33,7 +32,7 @@ export function Topbar() {
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--border-default)] bg-[var(--surface-overlay)] px-5 backdrop-blur-xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="font-medium text-[var(--accent-600)]">HIVA</span>
+        <span className="font-medium text-[var(--accent-600)]">HIVA-OS</span>
         <span className="text-[var(--text-faint)]">/</span>
         <span className="text-[var(--text-secondary)]">{getBreadcrumb()}</span>
       </div>

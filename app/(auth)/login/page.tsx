@@ -59,7 +59,7 @@ export default function LoginPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-2">
             <LogoAnimated size={36} className="text-white" spin pulse dotPulse />
-            <span className="font-display text-lg font-semibold">HIVA Companion Portal</span>
+            <span className="font-display text-lg font-semibold">HIVA-OS Compiler Portal</span>
           </div>
         </div>
 
@@ -93,14 +93,14 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 text-xs font-mono text-white/30">
-          HIVA Companion Portal
+          HIVA-OS Compiler Portal
         </div>
       </div>
 
       {/* Right panel — form */}
       <div className="flex w-full flex-col justify-center bg-[var(--bg-primary)] px-6 py-10 lg:w-1/2 lg:px-12">
         <div className="mx-auto w-full max-w-[420px]">
-          <span className="badge badge-accent mb-6">HIVA Companion Portal</span>
+          <span className="badge badge-accent mb-6">HIVA-OS Compiler Portal</span>
           <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Welcome back</h2>
           <p className="mt-1 text-sm text-[var(--text-muted)]">Sign in to continue to your workspace.</p>
 

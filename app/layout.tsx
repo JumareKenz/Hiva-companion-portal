@@ -3,7 +3,7 @@ import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'HIVA Companion Portal',
+  title: 'HIVA-OS Compiler Portal',
   description:
     'Review clinical documents, compile .hiv bundles, and deploy signed releases to frontline health workers.',
 }
