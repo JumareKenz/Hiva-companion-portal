@@ -80,8 +80,8 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
 
   const handleFile = useCallback((f: File | null | undefined) => {
     if (!f) return
-    if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(f.type)) {
-      toast.error('Only PDF and DOCX files are supported')
+    if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown'].includes(f.type)) {
+      toast.error('Only PDF, DOCX, TXT, and MD files are supported')
       return
     }
     if (f.size > MAX_FILE_SIZE) {
@@ -147,7 +147,7 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
             </p>
             <input
               type="file"
-              accept=".pdf,.docx"
+              accept=".pdf,.docx,.txt,.md"
               className="hidden"
               onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
               id="file-input"
