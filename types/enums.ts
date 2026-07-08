@@ -10,34 +10,23 @@ export type DocumentStatus =
 export type BlockType = 'paragraph' | 'heading' | 'table' | 'image_placeholder'
 export type BlockStatus = 'pending' | 'approved' | 'flagged'
 
-export type BundleJobStatus = 'queued' | 'running' | 'awaiting_review' | 'complete' | 'failed'
+export type BundleJobStatus = 'queued' | 'running' | 'complete' | 'failed'
 
-export type PipelineStage = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+export type PipelineStage = 0 | 1 | 2 | 3 | 4
 
 export const PIPELINE_STAGES: { stage: PipelineStage; label: string; description: string }[] = [
-  { stage: 0, label: 'Upload & OCR', description: 'Document ingestion and text extraction' },
-  { stage: 1, label: 'Chunking', description: 'Identifying logical content boundaries' },
-  { stage: 2, label: 'Semantic Review', description: 'Repairing broken chunk boundaries' },
-  { stage: 3, label: 'LLM Processing', description: 'Extracting Q&A and medical terms' },
-  { stage: 4, label: 'Tone Variants', description: 'Generating formal/reassuring/urgent versions' },
-  { stage: 5, label: 'Rule Extraction', description: 'Building decision trees and calculators' },
-  { stage: 6, label: 'Human Review', description: 'Domain expert approval of clinical rules' },
-  { stage: 7, label: 'Translation', description: 'Translating into target languages' },
-  { stage: 8, label: 'Packaging', description: 'Creating signed .hiv bundle' },
+  { stage: 0, label: 'Chunk', description: 'Splitting source text into logical content blocks' },
+  { stage: 1, label: 'Deduplicate', description: 'Removing duplicate and redundant chunks' },
+  { stage: 2, label: 'Translate', description: 'LLM translation into target languages' },
+  { stage: 3, label: 'Package & Embed', description: 'Embedding vectors and packaging bundle' },
+  { stage: 4, label: 'Sign', description: 'Cryptographically signing the .hiv bundle' },
 ]
-
-export type ReviewDecision = 'APPROVED' | 'EDITED' | 'REJECTED'
-export type ReviewStatus = 'PENDING' | 'APPROVED' | 'EDITED' | 'REJECTED'
 
 export type JobStatus = 'queued' | 'running' | 'complete' | 'failed'
 export type JobStep =
   | 'chunk'
   | 'deduplicate'
-  | 'process'
-  | 'tone'
-  | 'rule_compile'
   | 'translate'
-  | 'validate'
   | 'package'
   | 'sign'
   | 'complete'

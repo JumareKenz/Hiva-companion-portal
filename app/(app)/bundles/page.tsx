@@ -9,10 +9,8 @@ import {
   Download,
   PackageCheck,
   ShieldCheck,
-  AlertTriangle,
   Plus,
   Clock,
-  UserCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -300,7 +298,7 @@ export default function BundlesPage() {
                         <td className="px-4 py-3">
                           {job.current_stage !== null ? (
                             <span className="font-mono text-sm text-[var(--text-secondary)]">
-                              {job.current_stage}/8
+                              {job.current_stage}/4
                             </span>
                           ) : (
                             <span className="text-xs text-[var(--text-faint)]">—</span>
@@ -321,14 +319,10 @@ export default function BundlesPage() {
                         </td>
                         <td className="px-4 py-3">
                           <Link
-                            href={job.status === 'awaiting_review' ? `/bundles/review/${job.id}` : `/bundles/status/${job.id}`}
+                            href={`/bundles/status/${job.id}`}
                             className="btn btn-ghost btn-sm text-xs"
                           >
-                            {job.status === 'awaiting_review' ? (
-                              <><UserCheck className="h-3.5 w-3.5" /> Review</>
-                            ) : (
-                              'View'
-                            )}
+                            View
                           </Link>
                         </td>
                       </tr>

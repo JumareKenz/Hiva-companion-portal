@@ -4,8 +4,6 @@ import type {
   BlockStatus,
   BundleJobStatus,
   PipelineStage,
-  ReviewDecision,
-  ReviewStatus,
   JobStatus,
   JobStep,
   ChunkType,
@@ -92,7 +90,6 @@ export interface CompileJob {
   hiv_file_size_kb: number | null
   chunk_count: number | null
   reused_chunk_count: number | null
-  validation_warnings: string[] | null
   error_message: string | null
   created_by: { id: string; full_name: string }
   created_at: string
@@ -127,41 +124,20 @@ export interface BundleJob {
   created_at: string
 }
 
-export interface RuleForReview {
-  chunk_id: string
-  rule_index: number
+export interface Chunk {
+  id: string
+  type: ChunkType
   display_title: string
-  rule_type: 'decision_tree' | 'calculator' | 'protocol' | 'checklist'
   raw_text: string
-  plain_language: string
-  structured_content: Record<string, unknown>
-  status: ReviewStatus
-  reviewer_notes: string | null
-  reviewed_at: string | null
-}
-
-export interface RuleReviewSubmission {
-  decision: ReviewDecision
-  edited_content?: Record<string, unknown>
-  notes?: string
-}
-
-export interface ReviewStatusSummary {
-  total_rules: number
-  pending_count: number
-  approved_count: number
-  edited_count: number
-  rejected_count: number
-  can_package: boolean
-  blocking_issues: string[]
+  translations: Partial<Record<Language, string>>
 }
 
 export interface ChunkLibraryEntry {
   id: string
   content_hash: string
   chunk_type?: ChunkType
-  compiled_en_preview: string | null
-  tone_applied: boolean
+  display_title: string
+  raw_text: string
   translations_available: string[]
   created_at: string
   last_used_at: string
@@ -169,8 +145,6 @@ export interface ChunkLibraryEntry {
 
 export interface ChunkStats {
   total: number
-  compiled: number
-  tone_applied: number
   translated_by_lang: Record<string, number>
   reuse_rate: number
 }

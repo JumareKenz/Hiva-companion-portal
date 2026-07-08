@@ -7,23 +7,15 @@ import type { JobStep } from '@/types/enums'
 const STEPS: JobStep[] = [
   'chunk',
   'deduplicate',
-  'process',
-  'tone',
-  'rule_compile',
   'translate',
-  'validate',
   'package',
   'sign',
 ]
 
 const STEP_LABELS: Record<JobStep, string> = {
   chunk: 'Chunk',
-  deduplicate: 'Deduplicate',
-  process: 'Process',
-  tone: 'Tone',
-  rule_compile: 'Rule Compile',
+  deduplicate: 'Dedup',
   translate: 'Translate',
-  validate: 'Validate',
   package: 'Package',
   sign: 'Sign',
   complete: 'Complete',

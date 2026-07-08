@@ -79,8 +79,8 @@ export default function SourcesPage() {
           className="entrance entrance-d1"
         />
         <StatCard
-          label="Compiled"
-          value={stats?.compiled ?? '—'}
+          label="With Translations"
+          value={stats ? Object.values(stats.translated_by_lang).reduce((a, b) => Math.max(a, b), 0) : '—'}
           icon={<CheckCircle className="h-4 w-4 text-[var(--text-faint)]" />}
           className="entrance entrance-d2"
         />
@@ -158,7 +158,7 @@ export default function SourcesPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[var(--border-subtle)]">
-              {['CONTENT HASH', 'TYPE', 'PREVIEW', 'TONE', 'TRANSLATIONS', 'LAST USED'].map((h) => (
+              {['CONTENT HASH', 'TYPE', 'PREVIEW', 'TRANSLATIONS', 'LAST USED'].map((h) => (
                 <th key={h} className="px-4 py-2.5 text-left label">
                   {h}
                 </th>
@@ -169,14 +169,14 @@ export default function SourcesPage() {
             {chunksLoading || statsLoading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={6} className="px-4 py-2.5">
+                  <td colSpan={5} className="px-4 py-2.5">
                     <SkeletonLoader variant="row" />
                   </td>
                 </tr>
               ))
             ) : filteredChunks.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={5}>
                   <EmptyState
                     icon={<Database className="h-6 w-6 text-[var(--text-faint)]" />}
                     title="No chunks found"
@@ -206,17 +206,10 @@ export default function SourcesPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {chunk.compiled_en_preview ? (
-                        <span className="text-xs text-[var(--text-secondary)] truncate max-w-[200px] block" title={chunk.compiled_en_preview}>
-                          {chunk.compiled_en_preview}
+                      {chunk.display_title ? (
+                        <span className="text-xs text-[var(--text-secondary)] truncate max-w-[200px] block" title={chunk.display_title}>
+                          {chunk.display_title}
                         </span>
-                      ) : (
-                        <span className="inline-block h-4 w-4 rounded-full border-2 border-[var(--bg-tertiary)]" />
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {chunk.tone_applied ? (
-                        <CheckCircle className="h-4 w-4 text-[var(--success)]" />
                       ) : (
                         <span className="inline-block h-4 w-4 rounded-full border-2 border-[var(--bg-tertiary)]" />
                       )}

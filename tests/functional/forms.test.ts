@@ -184,9 +184,9 @@ describe('PHASE 2 — Functional Testing', () => {
   })
 
   describe('Compile Job — Step Progression', () => {
-    it('should accept all 9 pipeline steps', () => {
-      const steps = ['chunk', 'deduplicate', 'process', 'tone', 'rule_compile', 'translate', 'validate', 'package', 'sign']
-      expect(steps).toHaveLength(9)
+    it('should accept all 5 pipeline steps', () => {
+      const steps = ['chunk', 'deduplicate', 'translate', 'package', 'sign']
+      expect(steps).toHaveLength(5)
       expect(steps).toContain('chunk')
       expect(steps).toContain('sign')
     })

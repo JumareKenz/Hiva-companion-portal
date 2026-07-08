@@ -9,7 +9,6 @@ import {
   Globe,
   Database,
   Rocket,
-  UserCheck,
   Clock,
   ShieldCheck,
   Key,
@@ -64,7 +63,6 @@ export default function DashboardPage() {
   const activeCodesCount = accessCodesData?.meta.total ?? 0
   const jobs = bundleJobs?.data ?? []
   const activeJobs = jobs.filter((j) => j.status === 'running' || j.status === 'queued')
-  const reviewJobs = jobs.filter((j) => j.status === 'awaiting_review')
 
   const now = new Date()
   const hour = now.getHours()
@@ -98,26 +96,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Operational alerts */}
-      {(reviewJobs.length > 0 || activeJobs.length > 0) && (
+      {activeJobs.length > 0 && (
         <div className="space-y-3 entrance entrance-d1">
-          {reviewJobs.map((job) => (
-            <Link
-              key={job.id}
-              href={`/bundles/review/${job.id}`}
-              className="flex items-center gap-3 rounded-xl border border-[var(--warning)]/30 bg-[var(--warning)]/5 p-4 transition-colors hover:bg-[var(--warning)]/10"
-            >
-              <UserCheck className="h-5 w-5 text-[var(--warning)]" />
-              <div className="flex-1">
-                <span className="text-sm font-medium text-[var(--text-primary)]">
-                  Human review required
-                </span>
-                <span className="ml-2 text-xs text-[var(--text-muted)]">
-                  Build {job.id.slice(0, 8)} has extracted rules awaiting approval
-                </span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-[var(--warning)]" />
-            </Link>
-          ))}
           {activeJobs.map((job) => (
             <Link
               key={job.id}
@@ -227,7 +207,7 @@ export default function DashboardPage() {
               {jobs.map((job) => (
                 <Link
                   key={job.id}
-                  href={job.status === 'awaiting_review' ? `/bundles/review/${job.id}` : `/bundles/status/${job.id}`}
+                  href={`/bundles/status/${job.id}`}
                   className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-[var(--bg-secondary)]"
                 >
                   <div className="min-w-0 flex-1">
@@ -237,7 +217,7 @@ export default function DashboardPage() {
                       </span>
                       {job.current_stage !== null && (
                         <span className="text-xs text-[var(--text-faint)]">
-                          Stage {job.current_stage}/8
+                          Stage {job.current_stage}/4
                         </span>
                       )}
                     </div>

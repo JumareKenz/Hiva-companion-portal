@@ -10,7 +10,6 @@ import {
   Clock,
   FileStack,
   Globe,
-  UserCheck,
 } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -48,7 +47,6 @@ export default function BuildStatusPage() {
     )
   }
 
-  const isTerminal = job.status === 'complete' || job.status === 'failed'
   const isRunning = job.status === 'queued' || job.status === 'running'
 
   return (
@@ -88,30 +86,6 @@ export default function BuildStatusPage() {
               progress={job.progress}
             />
           </div>
-
-          {job.status === 'awaiting_review' && (
-            <div className="surface-raised border-[var(--warning)]/30 bg-[var(--warning)]/5 p-5">
-              <div className="flex items-start gap-3">
-                <UserCheck className="mt-0.5 h-5 w-5 text-[var(--warning)]" />
-                <div className="flex-1">
-                  <h3 className="font-medium text-[var(--text-primary)]">
-                    Human Review Required
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    The pipeline has extracted clinical rules that need domain expert approval
-                    before packaging can continue.
-                  </p>
-                  <Link
-                    href={`/bundles/review/${job.id}`}
-                    className="btn btn-primary btn-sm mt-3"
-                  >
-                    <UserCheck className="h-4 w-4" />
-                    Review Rules
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
 
           {job.status === 'failed' && job.error_message && (
             <div className="surface-raised border-[var(--error)]/30 bg-[var(--error)]/5 p-5">

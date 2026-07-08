@@ -21,6 +21,7 @@ import {
   Cpu,
   FolderOpen,
   Key,
+  ScanText,
 } from 'lucide-react'
 
 interface NavItem {
@@ -46,6 +47,7 @@ const SECTIONS: NavSection[] = [
       { href: '/documents', label: 'Documents', icon: FileStack },
       { href: '/bundles', label: 'Bundles & Builds', icon: Package },
       { href: '/access-codes', label: 'Access Codes', icon: Key },
+      { href: '/ocr', label: 'PDF to Text', icon: ScanText },
     ],
   },
   {
@@ -84,7 +86,7 @@ function getInitialExpanded(pathname: string): Record<string, boolean> {
 }
 
 function getSectionForPath(pathname: string): string | null {
-  if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles') || pathname.startsWith('/access-codes')) {
+  if (pathname === '/' || pathname.startsWith('/documents') || pathname.startsWith('/bundles') || pathname.startsWith('/access-codes') || pathname.startsWith('/ocr')) {
     return 'compiler'
   }
   if (pathname.startsWith('/sources') || pathname.startsWith('/audit') || pathname.startsWith('/settings')) {

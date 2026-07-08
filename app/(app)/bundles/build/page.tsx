@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { Check, CheckSquare, Square, Rocket, ChevronLeft, Globe, FileStack } from 'lucide-react'
+import { Check, CheckSquare, Square, Rocket, ChevronLeft, Globe, FileStack, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -215,17 +215,23 @@ export default function BuildBundlePage() {
                   <span className="font-medium text-[var(--text-primary)]">{selectedLanguages.length}</span>
                 </div>
               </div>
+              {selectedLanguages.length > 1 && (
+                <div className="mb-3 flex items-start gap-2 rounded-md bg-[var(--accent-600)]/5 px-3 py-2 text-xs text-[var(--accent-600)]">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Each additional language adds ~3–5 min for LLM translation.
+                    English-only builds finish in ~50 seconds.
+                  </span>
+                </div>
+              )}
               <button
                 onClick={handleBuild}
                 disabled={selectedDocs.size === 0 || isBuilding}
-                className="btn btn-primary mt-4 w-full"
+                className="btn btn-primary w-full"
               >
                 <Rocket className="h-4 w-4" />
                 {isBuilding ? 'Starting Build...' : 'Start Bundle Build'}
               </button>
-              <p className="mt-2 text-center text-xs text-[var(--text-faint)]">
-                Build takes 5–15 minutes depending on document count
-              </p>
             </div>
           </div>
         </div>

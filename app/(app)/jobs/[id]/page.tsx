@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
-import { FileStack, Download, AlertTriangle, ShieldCheck, RotateCw } from 'lucide-react'
+import { FileStack, Download, ShieldCheck, RotateCw } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { jobsService } from '@/services/jobs.service'
@@ -154,14 +154,6 @@ export default function JobPage() {
               </div>
             </div>
 
-            {job.validation_warnings && job.validation_warnings.length > 0 && (
-              <div className="mt-3 rounded-md bg-[var(--warning)]/5 p-2 text-xs text-[var(--warning)]">
-                <div className="flex items-center gap-1.5">
-                  <AlertTriangle className="h-3 w-3" />
-                  {job.validation_warnings.length} validation warning(s)
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Bundle ready */}

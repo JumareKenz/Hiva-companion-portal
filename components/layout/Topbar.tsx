@@ -16,12 +16,12 @@ export function Topbar() {
   const getBreadcrumb = () => {
     if (pathname === '/') return 'Dashboard'
     if (pathname.startsWith('/bundles/status/')) return 'Build Status'
-    if (pathname.startsWith('/bundles/review/')) return 'Rule Review'
     if (pathname.startsWith('/bundles/build')) return 'Build Bundle'
     if (pathname.startsWith('/bundles')) return 'Bundles'
     if (pathname.startsWith('/documents/')) return 'Document Details'
     if (pathname.startsWith('/documents')) return 'Documents'
     if (pathname.startsWith('/access-codes')) return 'Access Codes'
+    if (pathname.startsWith('/ocr')) return 'PDF to Text'
     if (pathname.startsWith('/sources')) return 'Chunk Library'
     if (pathname.startsWith('/audit')) return 'Audit Log'
     if (pathname.startsWith('/settings')) return 'Settings'

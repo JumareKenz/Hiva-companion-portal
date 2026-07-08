@@ -22,7 +22,6 @@ const JOB_STATUS_CONFIG: Record<
 > = {
   queued: { label: 'Queued', class: 'badge-ghost', dot: true },
   running: { label: 'Running', class: 'badge-accent', dot: true, pulse: true },
-  awaiting_review: { label: 'Awaiting Review', class: 'badge-warning', dot: true, pulse: true },
   complete: { label: 'Complete', class: 'badge-success' },
   failed: { label: 'Failed', class: 'badge-error' },
 }
